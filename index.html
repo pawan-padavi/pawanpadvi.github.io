@@ -1,0 +1,246 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pawan Padvi | Freelance .NET & Blazor Developer</title>
+    <meta name="description" content="Freelance .NET Core Developer with 4+ years experience in Hospital Management Systems, RDLC Reports and Azure Migration." />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --accent: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            color: white;
+            padding: 90px 20px;
+            text-align: center;
+        }
+
+        .cta-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            border-radius: 999px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-secondary {
+            background: var(--accent);
+            color: white;
+        }
+
+        section {
+            padding: 70px 20px;
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .about {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .skills, .projects, .badges {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff, #eef2ff);
+            padding: 28px;
+            border-radius: 18px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 20px 45px rgba(37, 99, 235, 0.18);
+            }
+
+        .contact {
+            text-align: center;
+        }
+
+        .whatsapp {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #25d366;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .about {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Pawan Padvi</h1>
+        <p>Freelance .NET & Blazor Developer | Government & Enterprise Solutions</p>
+        <div class="cta-buttons">
+            <a href="#contact" class="btn btn-primary">Hire Me</a>
+            <a href="mailto:pawan.padvi@zohomail.in" class="btn btn-secondary">Email Me</a>
+        </div>
+    </header>
+
+    <section>
+        <div class="container">
+            <h2>About Me</h2>
+            <div class="about">
+                <div>
+                    <p>
+                        I am a professional <strong>.NET & Blazor Software Engineer</strong> with over <strong>4 years of hands-on experience</strong> in building scalable, secure, and high-performance enterprise applications. I specialize in enterprise-grade systems, cloud migration, and reporting solutions.
+                    </p>
+                    <p style="margin-top:15px;">
+                        I help businesses modernize their applications, automate operations, and migrate legacy systems to the cloud using Microsoft Azure.
+                    </p>
+                </div>
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80" alt="Software Developer">
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Core Skills</h2>
+            <div class="skills">
+                <div class="card"><h3>🔹.NET Core</h3><p>REST APIs, MVC, Web Applications</p></div>
+                <div class="card"><h3>🔹RDLC Reports</h3><p>Complex report design & optimization</p></div>
+                <div class="card"><h3>🔹SQL Server</h3><p>Performance tuning, procedures, queries</p></div>
+                <div class="card"><h3>🔹Azure Cloud</h3><p>On-Prem to Azure migration, hosting</p></div>
+                <div class="card"><h3>🔹Blazor Framework</h3><p>Blazor Server & WebAssembly, Component-based UI</p></div>
+                <div class="card"><h3>🔹Angular / Frontend</h3><p>Responsive UI & dashboards</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Projects & Experience</h2>
+            <div class="projects">
+                <div class="card">
+                    <h3>🏥 Hospital Management System (Offline)</h3>
+                    <p>
+                        Developed an offline hospital management software covering patient registration, billing, doctor scheduling, and reports using .NET technologies and SQL Server.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Guruji Student Credit Card Scheme</h3>
+                    <p>
+                        Government of Jharkhand portal for student financial assistance.<br>
+                        <a href="https://gscc.jharkhand.gov.in/" target="_blank">Visit Project</a>
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Eklavya Prashikshan Yojana</h3>
+                    <p>
+                        Skill development and training portal built for government users.<br>
+                        <a href="https://eklavya.apphost.in/" target="_blank">Visit Project</a>
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Mukhyamantri Shiksha Prashikshan Yojana</h3>
+                    <p>
+                        Education-focused government scheme portal.<br>
+                        <a href="https://mukhyamantri.apphost.in/" target="_blank">Visit Project</a>
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>🌍 Azure Migration – AON (British–American Company)</h3>
+                    <p>
+                        Migrated an on-premise enterprise application for <strong>AON</strong>, a British–American multinational professional services firm, to Microsoft Azure including hosting, database migration, security configuration, and performance optimization.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>RDLC Reporting – IFFCO Delhi</h3>
+                    <p>
+                        Designed and optimized RDLC reports for enterprise systems ensuring accuracy and performance.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="container">
+            <h2>Contact Me</h2>
+            <p><strong>Email:</strong> pawan.padvi@zohomail.in</p>
+            <p><strong>Mobile:</strong> +91 7875541540</p>
+            <p>Available for freelance & remote projects</p>
+        </div>
+    </section>
+
+    <footer>
+        © 2026 Pawan Padvi | Freelance .NET & Blazor Developer
+    </footer>
+
+    <a class="whatsapp" href="https://wa.me/917875541540" target="_blank">Chat on WhatsApp</a>
+
+</body>
+</html>
