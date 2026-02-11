@@ -1,246 +1,194 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pawan Padvi | Freelance .NET & Blazor Developer</title>
-    <meta name="description" content="Freelance .NET Core Developer with 4+ years experience in Hospital Management Systems, RDLC Reports and Azure Migration." />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawan Padvi | Senior .NET & AI Engineer Specialist</title>
+    <meta name="description" content="Portfolio of Pawan Padvi, a Software Engineer with 4+ years experience in .NET, Blazor, and Azure migration.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2563eb;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --accent: #22c55e;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-
         body {
-            background: var(--light);
-            color: var(--dark);
-            line-height: 1.6;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
         }
 
-        header {
-            background: linear-gradient(135deg, #2563eb, #1e40af);
-            color: white;
-            padding: 90px 20px;
-            text-align: center;
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
         }
 
-        .cta-buttons {
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 22px;
-            border-radius: 999px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: white;
-            color: var(--primary);
-        }
-
-        .btn-secondary {
-            background: var(--accent);
-            color: white;
-        }
-
-        section {
-            padding: 70px 20px;
-            width: 100%;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            width: 100%;
-        }
-
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        .about {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .skills, .projects, .badges {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background: linear-gradient(135deg, #ffffff, #eef2ff);
-            padding: 28px;
-            border-radius: 18px;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-            .card:hover {
-                transform: translateY(-6px);
-                box-shadow: 0 20px 45px rgba(37, 99, 235, 0.18);
-            }
-
-        .contact {
-            text-align: center;
-        }
-
-        .whatsapp {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: #25d366;
-            color: white;
-            padding: 14px 18px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        footer {
-            background: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .about {
-                grid-template-columns: 1fr;
-            }
+        .gradient-text {
+            background: linear-gradient(90deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 leading-relaxed">
 
-    <header>
-        <h1>Pawan Padvi</h1>
-        <p>Freelance .NET & Blazor Developer | Government & Enterprise Solutions</p>
-        <div class="cta-buttons">
-            <a href="#contact" class="btn btn-primary">Hire Me</a>
-            <a href="mailto:pawan.padvi@zohomail.in" class="btn btn-secondary">Email Me</a>
+    <nav class="fixed w-full z-50 glass border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <span class="text-xl font-bold tracking-tight text-slate-900 underline decoration-blue-500 decoration-4">Pawan.Dev</span>
+            <div class="hidden md:flex space-x-8 text-sm font-semibold text-slate-600">
+                <a href="#about" class="hover:text-blue-600 transition">About</a>
+                <a href="#projects" class="hover:text-blue-600 transition">Projects</a>
+                <a href="#skills" class="hover:text-blue-600 transition">Skills</a>
+                <a href="#contact" class="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition shadow-md">Let's Talk</a>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <section>
-        <div class="container">
-            <h2>About Me</h2>
-            <div class="about">
+    <section class="pt-40 pb-20 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-wide text-blue-700 uppercase bg-blue-50 rounded-full">
+                Available for Enterprise & Freelance Projects
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
+                Building the Next Generation of <span class="gradient-text">Intelligent Systems.</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-3xl mb-10 leading-relaxed">
+                Expert in <strong>.NET Core, Blazor, and Azure Cloud</strong>. Leveraging 4+ years of enterprise experience to bridge the gap between robust software and AI-driven automation.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a href="#projects" class="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-lg">View Portfolio</a>
+                <a href="#about" class="px-8 py-4 bg-white border border-slate-200 font-bold rounded-xl hover:bg-slate-50 transition">About</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-24 px-6 bg-white border-y border-slate-100">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
                 <div>
-                    <p>
-                        I am a professional <strong>.NET & Blazor Software Engineer</strong> with over <strong>4 years of hands-on experience</strong> in building scalable, secure, and high-performance enterprise applications. I specialize in enterprise-grade systems, cloud migration, and reporting solutions.
+                    <h2 class="text-3xl font-bold mb-8 border-l-8 border-blue-600 pl-6 uppercase tracking-tighter">The Narrative</h2>
+                    <p class="text-lg text-slate-700 mb-6">
+                        I am a <strong>Software Engineer</strong> specialized in the Microsoft Stack. My career has been defined by delivering mission-critical portals for the Government of Jharkhand and British-American multinationals like AON.
                     </p>
-                    <p style="margin-top:15px;">
-                        I help businesses modernize their applications, automate operations, and migrate legacy systems to the cloud using Microsoft Azure.
+                    <p class="text-lg text-slate-700 mb-8">
+                        I am currently pivoting toward <strong>AI Engineering</strong>, focusing on the intersection of scalable backend architecture and predictive data models. I use my expertise in DSA to optimize complex workflows and build smarter digital products.
                     </p>
+                    <div class="flex gap-8">
+                        <div><span class="block text-3xl font-bold text-blue-600">4+</span><span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Years Exp</span></div>
+                        <div><span class="block text-3xl font-bold text-blue-600">10+</span><span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Global Clients</span></div>
+                    </div>
                 </div>
-                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80" alt="Software Developer">
-            </div>
-        </div>
-    </section>
-
-    <section>
-        <div class="container">
-            <h2>Core Skills</h2>
-            <div class="skills">
-                <div class="card"><h3>🔹.NET Core</h3><p>REST APIs, MVC, Web Applications</p></div>
-                <div class="card"><h3>🔹RDLC Reports</h3><p>Complex report design & optimization</p></div>
-                <div class="card"><h3>🔹SQL Server</h3><p>Performance tuning, procedures, queries</p></div>
-                <div class="card"><h3>🔹Azure Cloud</h3><p>On-Prem to Azure migration, hosting</p></div>
-                <div class="card"><h3>🔹Blazor Framework</h3><p>Blazor Server & WebAssembly, Component-based UI</p></div>
-                <div class="card"><h3>🔹Angular / Frontend</h3><p>Responsive UI & dashboards</p></div>
-            </div>
-        </div>
-    </section>
-
-    <section>
-        <div class="container">
-            <h2>Projects & Experience</h2>
-            <div class="projects">
-                <div class="card">
-                    <h3>🏥 Hospital Management System (Offline)</h3>
-                    <p>
-                        Developed an offline hospital management software covering patient registration, billing, doctor scheduling, and reports using .NET technologies and SQL Server.
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Guruji Student Credit Card Scheme</h3>
-                    <p>
-                        Government of Jharkhand portal for student financial assistance.<br>
-                        <a href="https://gscc.jharkhand.gov.in/" target="_blank">Visit Project</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Eklavya Prashikshan Yojana</h3>
-                    <p>
-                        Skill development and training portal built for government users.<br>
-                        <a href="https://eklavya.apphost.in/" target="_blank">Visit Project</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Mukhyamantri Shiksha Prashikshan Yojana</h3>
-                    <p>
-                        Education-focused government scheme portal.<br>
-                        <a href="https://mukhyamantri.apphost.in/" target="_blank">Visit Project</a>
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>🌍 Azure Migration – AON (British–American Company)</h3>
-                    <p>
-                        Migrated an on-premise enterprise application for <strong>AON</strong>, a British–American multinational professional services firm, to Microsoft Azure including hosting, database migration, security configuration, and performance optimization.
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>RDLC Reporting – IFFCO Delhi</h3>
-                    <p>
-                        Designed and optimized RDLC reports for enterprise systems ensuring accuracy and performance.
-                    </p>
+                <div class="bg-slate-50 border border-slate-200 p-8 rounded-[2rem] shadow-xl relative">
+                    <div class="absolute -top-4 -right-4 bg-blue-600 text-white px-4 py-1 rounded-lg text-xs font-bold rotate-12 shadow-lg">Future Trajectory</div>
+                    <h3 class="text-xl font-bold mb-6">Core Focus Areas</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-4 font-semibold text-slate-700">
+                            <span class="w-2 h-2 bg-blue-600 rounded-full"></span> .NET 8 / C# Enterprise Architect
+                        </li>
+                        <li class="flex items-center gap-4 font-semibold text-slate-700">
+                            <span class="w-2 h-2 bg-blue-600 rounded-full"></span> Azure Cloud & Security Migration
+                        </li>
+                        <li class="flex items-center gap-4 font-semibold text-slate-700">
+                            <span class="w-2 h-2 bg-blue-600 rounded-full"></span> AI/ML Integration & Predictive Logic
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="contact" id="contact">
-        <div class="container">
-            <h2>Contact Me</h2>
-            <p><strong>Email:</strong> pawan.padvi@zohomail.in</p>
-            <p><strong>Mobile:</strong> +91 7875541540</p>
-            <p>Available for freelance & remote projects</p>
+    <section id="projects" class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold mb-16 border-l-8 border-blue-600 pl-6 uppercase tracking-tighter">Selected Projects</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
+                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Enterprise</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Azure Migration: AON</h3>
+                    <p class="text-slate-600 text-sm mb-6">Led on-premise to Azure cloud migration for a major British–American MNC. Focused on security hardening and performance.</p>
+                    <div class="flex gap-2"><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">Azure Migration</span></div>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
+                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Guruji Student Credit Card</h3>
+                    <p class="text-slate-600 text-sm mb-6">Financial portal for Jharkhand Govt. Optimized for high-concurrency handling thousands of applicants.</p>
+                    <a href="https://gscc.jharkhand.gov.in/" target="_blank" class="text-blue-600 font-bold text-sm">Live Portal ↗</a>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
+                    <span class="text-emerald-600 text-xs font-bold uppercase tracking-widest">Healthcare</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Offline HMS</h3>
+                    <p class="text-slate-600 text-sm mb-6">Enterprise offline management system for patient billing, scheduling, and complex medical reports.</p>
+                    <div class="flex gap-2"><span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded font-bold">.NET Core</span></div>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
+                    <span class="text-amber-600 text-xs font-bold uppercase tracking-widest">Analytics</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">RDLC Reporting: IFFCO</h3>
+                    <p class="text-slate-600 text-sm mb-6">Designing high-performance enterprise reports for massive datasets in the fertilizer industry.</p>
+                    <div class="flex gap-2"><span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-1 rounded font-bold">SQL Analytics</span></div>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
+                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Eklavya Prashikshan</h3>
+                    <p class="text-slate-600 text-sm mb-6">Skill training portal for Jharkhand Government users, built on .NET architecture.</p>
+                    <a href="https://eklavya.apphost.in/" target="_blank" class="text-blue-600 font-bold text-sm">Live Portal ↗</a>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
+                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Education Portal</h3>
+                    <p class="text-slate-600 text-sm mb-6">Mukhyamantri Shiksha Yojana portal for state-wide educational scheme management.</p>
+                    <a href="https://mukhyamantri.apphost.in/" target="_blank" class="text-blue-600 font-bold text-sm">Live Portal ↗</a>
+                </div>
+
+            </div>
         </div>
     </section>
 
-    <footer>
-        © 2026 Pawan Padvi | Freelance .NET & Blazor Developer
+    <section id="skills" class="py-24 px-6 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            <div>
+                <h2 class="text-3xl font-bold mb-6">Technical Mastery</h2>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between mb-2"><span>.NET 8 / C# / Blazor</span><span>95%</span></div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full w-[95%]"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2"><span>Azure Migration & Security</span><span>90%</span></div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full w-[90%]"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2"><span>SQL / RDLC Reports</span><span>98%</span></div>
+                        <div class="w-full bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full w-[98%]"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-slate-800 rounded-xl text-sm font-semibold text-center border border-slate-700">Web API</div>
+                <div class="p-4 bg-slate-800 rounded-xl text-sm font-semibold text-center border border-slate-700">Entity Framework</div>
+                <div class="p-4 bg-slate-800 rounded-xl text-sm font-semibold text-center border border-slate-700">Angular</div>
+                <div class="p-4 bg-slate-800 rounded-xl text-sm font-semibold text-center border border-slate-700">Docker & DevOps</div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="py-24 px-6 text-center bg-white border-t border-slate-100">
+        <h2 class="text-4xl font-bold mb-12">Let's build the future together.</h2>
+        <div class="flex flex-col md:flex-row justify-center gap-12 mb-12">
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Email</p>
+                <a href="mailto:pawan.padvi@zohomail.in" class="text-xl font-bold hover:text-blue-600 transition">pawan.padvi@zohomail.in</a>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">WhatsApp</p>
+                <a href="https://wa.me/917875541540" class="text-xl font-bold hover:text-blue-600 transition">+91 78755 41540</a>
+            </div>
+        </div>
+        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">© 2026 PAWAN PADVI | SENIOR ENGINEER</p>
     </footer>
 
-    <a class="whatsapp" href="https://wa.me/917875541540" target="_blank">Chat on WhatsApp</a>
+    <a href="https://wa.me/917875541540" target="_blank" class="fixed bottom-8 right-8 bg-emerald-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition z-50 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+    </a>
 
 </body>
 </html>
