@@ -1,24 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Pawansing Padvi - Senior .NET & Blazor Engineer specializing in Government portals and Azure Cloud Migrations.">
     <meta name="keywords" content="Pawansing Padvi, .NET Developer, Blazor, C#, Azure Migration, Jharkhand Govt Projects">
     <title>Pawan Padvi | Senior .NET & AI Engineer Specialist</title>
-    <meta name="description" content="Portfolio of Pawan Padvi, a Software Engineer with 4+ years experience in .NET, Blazor, and Azure migration.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <script>
+        // Tailwind Configuration for Dark Mode
+        window.tailwind = {
+            config: {
+                darkMode: 'class',
+            }
+        }
+
+        // Logic to toggle and persist theme
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check for saved theme preference
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             scroll-behavior: smooth;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .glass {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
+        }
+
+        /* Dark mode glass override */
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(51, 65, 85, 0.5);
         }
 
         .gradient-text {
@@ -28,47 +66,53 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 leading-relaxed">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 leading-relaxed">
 
-    <nav class="fixed w-full z-50 glass border-b border-slate-200">
+    <nav class="fixed w-full z-50 glass border-b border-slate-200 dark:border-slate-800">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <span class="text-xl font-bold tracking-tight text-slate-900 underline decoration-blue-500 decoration-4">Pawan.Dev</span>
-            <div class="hidden md:flex space-x-8 text-sm font-semibold text-slate-600">
+            <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white underline decoration-blue-500 decoration-4">Pawan.Dev</span>
+            <div class="hidden md:flex space-x-8 items-center text-sm font-semibold text-slate-600 dark:text-slate-400">
                 <a href="#about" class="hover:text-blue-600 transition">About</a>
                 <a href="#projects" class="hover:text-blue-600 transition">Projects</a>
                 <a href="#skills" class="hover:text-blue-600 transition">Skills</a>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-yellow-400 transition-all">
+                    <svg class="hidden dark:block w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.415 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
+                    <svg class="block dark:hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                </button>
+
                 <a href="#contact" class="bg-blue-600 text-white px-5 py-2 rounded-full hover:bg-blue-700 transition shadow-md">Let's Talk</a>
             </div>
         </div>
     </nav>
 
-    <section class="pt-40 pb-20 px-6">
+    <section class="pt-40 pb-20 px-6 dark:bg-slate-950">
         <div class="max-w-5xl mx-auto">
-            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-wide text-blue-700 uppercase bg-blue-50 rounded-full">
+            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-wide text-blue-700 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-900/30 rounded-full">
                 Available for Enterprise & Freelance Projects
             </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 dark:text-white">
                 Building the Next Generation of <span class="gradient-text">Intelligent Systems.</span>
             </h1>
-            <p class="text-xl text-slate-600 max-w-3xl mb-10 leading-relaxed">
+            <p class="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mb-10 leading-relaxed">
                 Expert in <strong>.NET Core, Blazor, and Azure Cloud</strong>. Leveraging 4+ years of enterprise experience to bridge the gap between robust software and AI-driven automation.
             </p>
             <div class="flex flex-wrap gap-4">
-                <a href="#projects" class="px-8 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-lg">View Portfolio</a>
-                <a href="#about" class="px-8 py-4 bg-white border border-slate-200 font-bold rounded-xl hover:bg-slate-50 transition">About</a>
+                <a href="#projects" class="px-8 py-4 bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-lg">View Portfolio</a>
+                <a href="#about" class="px-8 py-4 bg-white dark:bg-slate-900 dark:text-white dark:border-slate-800 border border-slate-200 font-bold rounded-xl hover:bg-slate-50 transition">About</a>
             </div>
         </div>
     </section>
 
-    <section id="about" class="py-24 px-6 bg-white border-y border-slate-100">
+    <section id="about" class="py-24 px-6 bg-white dark:bg-slate-900 border-y border-slate-100 dark:border-slate-800">
         <div class="max-w-7xl mx-auto">
             <div class="grid md:grid-cols-2 gap-16 items-center">
                 <div class="order-2 md:order-1">
-                    <h2 class="text-3xl font-bold mb-8 border-l-8 border-blue-600 pl-6 uppercase tracking-tighter">The Narrative</h2>
-                    <p class="text-lg text-slate-700 mb-6">
+                    <h2 class="text-3xl font-bold mb-8 border-l-8 border-blue-600 dark:text-white pl-6 uppercase tracking-tighter">The Narrative</h2>
+                    <p class="text-lg text-slate-700 dark:text-slate-300 mb-6">
                         I am a <strong>Software Engineer</strong> specialized in the Microsoft Stack. My career has been defined by delivering mission-critical portals for the Government of Jharkhand and British-American multinationals like AON.
                     </p>
-                    <p class="text-lg text-slate-700 mb-8">
+                    <p class="text-lg text-slate-700 dark:text-slate-300 mb-8">
                         I am currently pivoting toward <strong>AI Engineering</strong>, focusing on the intersection of scalable backend architecture and predictive data models. I use my expertise in DSA to optimize complex workflows and build smarter digital products.
                     </p>
                     <div class="flex gap-8">
@@ -77,23 +121,23 @@
                     </div>
                 </div>
 
-                <div class="order-1 md:order-2 flex flex-col items-center">
+                <div class="order-1 md:order-2 flex flex-col items-center text-center">
                     <div class="relative mb-12">
                         <div class="absolute -inset-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-30 animate-pulse"></div>
-                        <img src="IMG001.png" alt="Pawan Padvi" class="relative w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-4 border-white shadow-2xl">
+                        <img src="IMG001.png" alt="Pawan Padvi" class="relative w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-4 border-white dark:border-slate-800 shadow-2xl">
                     </div>
 
-                    <div class="w-full bg-slate-50 border border-slate-200 p-8 rounded-[2rem] shadow-xl relative">
+                    <div class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-8 rounded-[2rem] shadow-xl relative text-left">
                         <div class="absolute -top-4 -right-4 bg-blue-600 text-white px-4 py-1 rounded-lg text-xs font-bold rotate-12 shadow-lg">Future Trajectory</div>
-                        <h3 class="text-xl font-bold mb-6">Core Focus Areas</h3>
+                        <h3 class="text-xl font-bold mb-6 dark:text-white">Core Focus Areas</h3>
                         <ul class="space-y-4">
-                            <li class="flex items-center gap-4 font-semibold text-slate-700 text-sm md:text-base">
+                            <li class="flex items-center gap-4 font-semibold text-slate-700 dark:text-slate-300 text-sm md:text-base">
                                 <span class="w-2 h-2 bg-blue-600 rounded-full"></span> .NET 10 / C# Enterprise Architect
                             </li>
-                            <li class="flex items-center gap-4 font-semibold text-slate-700 text-sm md:text-base">
+                            <li class="flex items-center gap-4 font-semibold text-slate-700 dark:text-slate-300 text-sm md:text-base">
                                 <span class="w-2 h-2 bg-blue-600 rounded-full"></span> Azure Cloud & Security Migration
                             </li>
-                            <li class="flex items-center gap-4 font-semibold text-slate-700 text-sm md:text-base">
+                            <li class="flex items-center gap-4 font-semibold text-slate-700 dark:text-slate-300 text-sm md:text-base">
                                 <span class="w-2 h-2 bg-blue-600 rounded-full"></span> AI/ML Integration & Predictive Logic
                             </li>
                         </ul>
@@ -103,72 +147,72 @@
         </div>
     </section>
 
-    <section id="projects" class="py-24 px-6">
+    <section id="projects" class="py-24 px-6 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto">
-            <h2 class="text-3xl font-bold mb-16 border-l-8 border-blue-600 pl-6 uppercase tracking-tighter">Selected Projects</h2>
+            <h2 class="text-3xl font-bold mb-16 border-l-8 border-blue-600 dark:text-white pl-6 uppercase tracking-tighter">Selected Projects</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
 
-                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
-                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Enterprise</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Azure Migration: AON</h3>
-                    <p class="text-slate-600 text-sm mb-6">Led on-premise to Azure cloud migration for a major British–American MNC. Focused on security hardening and performance.</p>
-                    <div class="flex gap-2"><span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">Azure Migration</span></div>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xl group">
+                    <span class="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">Enterprise</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700 dark:text-white">Azure Migration: AON</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">Led on-premise to Azure cloud migration for a major British–American MNC. Focused on security hardening and performance.</p>
+                    <div class="flex gap-2"><span class="text-[10px] bg-blue-100 dark:bg-blue-900/50 dark:text-blue-300 text-blue-700 px-2 py-1 rounded font-bold uppercase">Azure Migration</span></div>
                 </div>
 
-                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
-                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Guruji Student Credit Card</h3>
-                    <p class="text-slate-600 text-sm mb-6">Financial portal for Jharkhand Govt. Optimized for high-concurrency handling thousands of applicants.</p>
-                    <a href="https://gscc.jharkhand.gov.in/" target="_blank" class="text-blue-600 font-bold text-sm">Live Portal ↗</a>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xl group">
+                    <span class="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700 dark:text-white">Guruji Student Credit Card</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">Financial portal for Jharkhand Govt. Optimized for high-concurrency handling thousands of applicants.</p>
+                    <a href="https://gscc.jharkhand.gov.in/" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold text-sm inline-flex items-center gap-1">Live Portal ↗</a>
                 </div>
 
-                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
-                    <span class="text-emerald-600 text-xs font-bold uppercase tracking-widest">Healthcare</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Offline HMS</h3>
-                    <p class="text-slate-600 text-sm mb-6">Enterprise offline management system for patient billing, scheduling, and complex medical reports.</p>
-                    <div class="flex gap-2"><span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-1 rounded font-bold">.NET Core</span></div>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xl group">
+                    <span class="text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-widest">Healthcare</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700 dark:text-white">Offline HMS</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">Enterprise offline management system for patient billing, scheduling, and complex medical reports.</p>
+                    <div class="flex gap-2"><span class="text-[10px] bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-300 text-emerald-700 px-2 py-1 rounded font-bold uppercase">.NET Core</span></div>
                 </div>
 
-                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
-                    <span class="text-amber-600 text-xs font-bold uppercase tracking-widest">Analytics</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">RDLC Reporting: IFFCO</h3>
-                    <p class="text-slate-600 text-sm mb-6">Designing high-performance enterprise reports for massive datasets in the fertilizer industry.</p>
-                    <div class="flex gap-2"><span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-1 rounded font-bold">SQL Analytics</span></div>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xl group">
+                    <span class="text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-widest">Analytics</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700 dark:text-white">RDLC Reporting: IFFCO</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">Designing high-performance enterprise reports for massive datasets in the fertilizer industry.</p>
+                    <div class="flex gap-2"><span class="text-[10px] bg-amber-50 dark:bg-amber-900/30 dark:text-amber-300 text-amber-700 px-2 py-1 rounded font-bold uppercase">SQL Analytics</span></div>
                 </div>
 
-                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
-                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Eklavya Prashikshan</h3>
-                    <p class="text-slate-600 text-sm mb-6">Skill training portal for Jharkhand Government users, built on .NET architecture.</p>
-                    <a href="https://eklavya.apphost.in/" target="_blank" class="text-blue-600 font-bold text-sm">Live Portal ↗</a>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xl group">
+                    <span class="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700 dark:text-white">Eklavya Prashikshan</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">Skill training portal for Jharkhand Government users, built on .NET architecture.</p>
+                    <a href="https://eklavya.apphost.in/" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold text-sm inline-flex items-center gap-1">Live Portal ↗</a>
                 </div>
 
-                <div class="p-8 rounded-3xl bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl group">
-                    <span class="text-blue-600 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
-                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700">Education Portal</h3>
-                    <p class="text-slate-600 text-sm mb-6">Mukhyamantri Shiksha Yojana portal for state-wide educational scheme management.</p>
-                    <a href="https://mukhyamantri.apphost.in/" target="_blank" class="text-blue-600 font-bold text-sm">Live Portal ↗</a>
+                <div class="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:bg-blue-50 dark:hover:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-xl group">
+                    <span class="text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">Gov Tech</span>
+                    <h3 class="text-2xl font-bold mt-4 mb-4 group-hover:text-blue-700 dark:text-white">Education Portal</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">Mukhyamantri Shiksha Yojana portal for state-wide educational scheme management.</p>
+                    <a href="https://mukhyamantri.apphost.in/" target="_blank" class="text-blue-600 dark:text-blue-400 font-bold text-sm inline-flex items-center gap-1">Live Portal ↗</a>
                 </div>
 
             </div>
         </div>
     </section>
 
-    <section id="skills" class="py-24 px-6 bg-slate-900 text-white">
+    <section id="skills" class="py-24 px-6 bg-slate-900 dark:bg-black text-white">
         <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
             <div>
                 <h2 class="text-3xl font-bold mb-6">Technical Mastery</h2>
                 <div class="space-y-6">
                     <div>
-                        <div class="flex justify-between mb-2"><span>.NET 10 / C# / Blazor</span><span>95%</span></div>
+                        <div class="flex justify-between mb-2"><span class="text-slate-300">.NET 10 / C# / Blazor</span><span>95%</span></div>
                         <div class="w-full bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full w-[95%]"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between mb-2"><span>Azure Migration & Security</span><span>90%</span></div>
+                        <div class="flex justify-between mb-2"><span class="text-slate-300">Azure Migration & Security</span><span>90%</span></div>
                         <div class="w-full bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full w-[90%]"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between mb-2"><span>SQL / RDLC Reports</span><span>98%</span></div>
+                        <div class="flex justify-between mb-2"><span class="text-slate-300">SQL / RDLC Reports</span><span>98%</span></div>
                         <div class="w-full bg-slate-800 h-1.5 rounded-full"><div class="bg-blue-500 h-1.5 rounded-full w-[98%]"></div></div>
                     </div>
                 </div>
@@ -182,16 +226,16 @@
         </div>
     </section>
 
-    <footer id="contact" class="py-24 px-6 text-center bg-white border-t border-slate-100">
-        <h2 class="text-4xl font-bold mb-12">Let's build the future together.</h2>
+    <footer id="contact" class="py-24 px-6 text-center bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800">
+        <h2 class="text-4xl font-bold mb-12 dark:text-white">Let's build the future together.</h2>
         <div class="flex flex-col md:flex-row justify-center gap-12 mb-12">
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Email</p>
-                <a href="mailto:pawan.padvi@zohomail.in" class="text-xl font-bold hover:text-blue-600 transition">pawan.padvi@zohomail.in</a>
+                <a href="mailto:pawan.padvi@zohomail.in" class="text-xl font-bold hover:text-blue-600 dark:text-white transition">pawan.padvi@zohomail.in</a>
             </div>
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">WhatsApp</p>
-                <a href="https://wa.me/917875541540" class="text-xl font-bold hover:text-blue-600 transition">+91 78755 41540</a>
+                <a href="https://wa.me/917875541540" class="text-xl font-bold hover:text-blue-600 dark:text-white transition">+91 78755 41540</a>
             </div>
         </div>
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">© 2026 PAWAN PADVI | SOFTWARE ENGINEER</p>
