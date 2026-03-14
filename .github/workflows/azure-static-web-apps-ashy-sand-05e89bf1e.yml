@@ -30,13 +30,13 @@ jobs:
           action: "upload"
 
           # Root of repository
-          app_location: "/"
+          app_location: "portfolio"
 
           # No API
           api_location: ""
 
           # Site output folder
-          output_location: "portfolio"
+          output_location: ""
           
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
