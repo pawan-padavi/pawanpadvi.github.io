@@ -30,7 +30,7 @@ jobs:
           action: "upload"
 
           # Root of repository
-          app_location: "portfolio"
+          app_location: "Portfolio"
 
           # No API
           api_location: ""
