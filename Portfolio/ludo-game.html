@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ludo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#0d1220;
+    --bg-2:#171f38;
+    --panel:#1b2440;
+    --panel-2:#212b4d;
+    --panel-border:#2f3c66;
+    --ink:#eef1fb;
+    --ink-dim:#93a0c7;
+    --accent:#4fd8c9;
+    --gold:#f2c94c;
+    --red:#e8483c;
+    --red-dk:#a5231a;
+    --green:#2fa84f;
+    --green-dk:#1a6f34;
+    --yellow:#f2c94c;
+    --yellow-dk:#b8890f;
+    --blue:#3d7dff;
+    --blue-dk:#1f4fb0;
+    --cream:#f4efe0;
+    --cream-2:#ece3cc;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #24305a 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 110%, #24305a 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    font-family:'Nunito', sans-serif;
+    color:var(--ink);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding:clamp(10px,3vw,24px) clamp(8px,3vw,14px) 60px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app{width:100%;max-width:1180px;}
+  button{touch-action:manipulation;}
+
+  /* ---------- Header ---------- */
+  .titlebar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:18px;flex-wrap:wrap;gap:10px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .dot-cluster{width:38px;height:38px;position:relative;flex:none;}
+  .brand .dot-cluster span{
+    position:absolute;width:16px;height:16px;border-radius:50%;
+    box-shadow:0 2px 6px rgba(0,0,0,.4);
+  }
+  .brand .dot-cluster span:nth-child(1){background:var(--red);top:0;left:0;}
+  .brand .dot-cluster span:nth-child(2){background:var(--green);top:0;right:0;}
+  .brand .dot-cluster span:nth-child(3){background:var(--yellow);bottom:0;right:0;}
+  .brand .dot-cluster span:nth-child(4){background:var(--blue);bottom:0;left:0;}
+  .brand h1{
+    font-family:'Baloo 2',sans-serif;font-weight:800;
+    font-size:clamp(26px,4vw,36px);margin:0;letter-spacing:.5px;
+    text-shadow:0 2px 0 rgba(0,0,0,.25);
+  }
+  .brand h1 span{color:var(--accent);}
+  .new-game-btn{
+    background:var(--panel-2);border:1px solid var(--panel-border);color:var(--ink);
+    padding:10px 16px;border-radius:12px;font-family:'Nunito';font-weight:700;
+    cursor:pointer;font-size:14px;transition:.15s;
+  }
+  .new-game-btn:hover{background:var(--panel-border);}
+
+  /* ---------- Setup screen ---------- */
+  .setup{
+    background:var(--panel);border:1px solid var(--panel-border);
+    border-radius:22px;padding:clamp(24px,4vw,48px);
+    max-width:640px;margin:40px auto;text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+  .setup h2{font-family:'Baloo 2';font-size:26px;margin:0 0 6px;}
+  .setup p.sub{color:var(--ink-dim);margin:0 0 28px;font-size:15px;}
+  .count-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+  .count-btn{
+    width:78px;height:78px;border-radius:18px;border:2px solid var(--panel-border);
+    background:var(--panel-2);color:var(--ink);font-family:'Baloo 2';font-size:26px;font-weight:700;
+    cursor:pointer;transition:.15s;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;
+  }
+  .count-btn small{font-family:'Nunito';font-size:11px;color:var(--ink-dim);font-weight:600;}
+  .count-btn:hover{transform:translateY(-2px);border-color:var(--accent);}
+  .count-btn.selected{border-color:var(--accent);background:rgba(79,216,201,.14);box-shadow:0 0 0 3px rgba(79,216,201,.2);}
+
+  .name-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;text-align:left;}
+  @media (max-width:480px){.name-grid{grid-template-columns:1fr;}}
+  .name-field{
+    display:flex;align-items:center;gap:8px;background:var(--panel-2);
+    border:1px solid var(--panel-border);border-radius:12px;padding:8px 8px 8px 12px;
+  }
+  .swatch{width:20px;height:20px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 2px rgba(255,255,255,.25);}
+  .name-field input{
+    background:transparent;border:none;outline:none;color:var(--ink);font-family:'Nunito';
+    font-weight:700;font-size:14px;width:100%;min-width:0;
+  }
+  .ai-toggle{
+    flex:none;border:1px solid var(--panel-border);background:var(--bg-1);color:var(--ink-dim);
+    border-radius:9px;padding:6px 9px;font-family:'Nunito';font-weight:700;font-size:11.5px;
+    cursor:pointer;white-space:nowrap;transition:.15s;
+  }
+  .ai-toggle:hover{border-color:var(--accent);}
+  .ai-toggle.is-ai{background:var(--gold);color:#3a2705;border-color:var(--gold);}
+  .fill-cpu-btn{
+    display:block;margin:0 auto 20px;background:transparent;border:none;
+    color:var(--accent);font-family:'Nunito';font-weight:700;font-size:12.5px;
+    cursor:pointer;text-decoration:underline;text-underline-offset:3px;
+  }
+  .start-btn{
+    background:linear-gradient(180deg, var(--accent), #33b6a8);
+    color:#04231e;border:none;border-radius:14px;padding:14px 34px;
+    font-family:'Baloo 2';font-weight:700;font-size:18px;cursor:pointer;
+    box-shadow:0 8px 20px rgba(79,216,201,.25);transition:.15s;
+  }
+  .start-btn:hover{transform:translateY(-2px);}
+
+  /* ---------- Game layout ---------- */
+  .game{display:none;gap:22px;align-items:flex-start;justify-content:center;flex-wrap:wrap;width:100%;}
+  .game.active{display:flex;}
+
+  .board-wrap{
+    background:linear-gradient(160deg,#20294a,#161d34);
+    border:1px solid var(--panel-border);
+    border-radius:24px;padding:clamp(8px,2vw,14px);
+    box-shadow:0 24px 60px rgba(0,0,0,.4);
+    flex:none;
+    max-width:100%;
+  }
+  .board{
+    width:min(92vw,540px);
+    aspect-ratio:1/1;
+    display:grid;
+    grid-template-columns:repeat(15,1fr);
+    grid-template-rows:repeat(15,1fr);
+    background:var(--cream);
+    border-radius:10px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);
+    touch-action:manipulation;
+  }
+  @media (min-width:640px){
+    .board{width:min(52vw,540px);}
+  }
+
+  .yard{
+    border-radius:8px;margin:8%;position:relative;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .yard::after{
+    content:"";position:absolute;inset:14%;background:var(--cream);border-radius:14%;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.08);
+  }
+  .yard.red{background:var(--red);}
+  .yard.green{background:var(--green);}
+  .yard.yellow{background:var(--yellow);}
+  .yard.blue{background:var(--blue);}
+
+  .cell{
+    position:relative;
+    background:var(--cream);
+    box-shadow:inset 0 0 0 .5px rgba(0,0,0,.12);
+  }
+  .cell.path-red{background:var(--red);}
+  .cell.path-green{background:var(--green);}
+  .cell.path-yellow{background:var(--yellow);}
+  .cell.path-blue{background:var(--blue);}
+  .cell.home-red{background:#f6d9d5;}
+  .cell.home-green{background:#d6ecdb;}
+  .cell.home-yellow{background:#faf0cd;}
+  .cell.home-blue{background:#d9e6fb;}
+  .cell.safe::before{
+    content:"★";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:rgba(0,0,0,.32);
+  }
+
+  .center-home{
+    grid-row:7/10;grid-column:7/10;position:relative;overflow:hidden;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.15);
+  }
+  .center-home .tri{position:absolute;width:100%;height:100%;}
+  .center-home .tri.top{background:var(--green);clip-path:polygon(0 0,100% 0,50% 50%);}
+  .center-home .tri.right{background:var(--yellow);clip-path:polygon(100% 0,100% 100%,50% 50%);}
+  .center-home .tri.bottom{background:var(--blue);clip-path:polygon(0 100%,100% 100%,50% 50%);}
+  .center-home .tri.left{background:var(--red);clip-path:polygon(0 0,0 100%,50% 50%);}
+  .center-home .flag{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:15px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));
+  }
+
+  .stack{
+    position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    gap:1px;padding:1px;z-index:5;
+  }
+  .token{
+    border-radius:50%;
+    box-shadow:0 2px 3px rgba(0,0,0,.45), inset 0 -2px 2px rgba(0,0,0,.2), inset 0 2px 2px rgba(255,255,255,.35);
+    cursor:default;
+    transition:transform .08s;
+    flex:none;
+    touch-action:manipulation;
+  }
+  .token.hopping{animation:hop .19s cubic-bezier(.34,1.56,.64,1);}
+  .token.capture-pop{animation:capturePop .32s ease-out;}
+  @keyframes hop{
+    0%{transform:scale(1) translateY(0);}
+    35%{transform:scale(.82,1.16) translateY(-38%);}
+    70%{transform:scale(1.08,.92) translateY(4%);}
+    100%{transform:scale(1) translateY(0);}
+  }
+  @keyframes capturePop{
+    0%{transform:scale(0.2) rotate(-30deg);opacity:.3;}
+    55%{transform:scale(1.25) rotate(8deg);opacity:1;}
+    100%{transform:scale(1) rotate(0);}
+  }
+  .stack[data-count="1"] .token{width:72%;height:72%;}
+  .stack[data-count="2"] .token{width:46%;height:46%;}
+  .stack[data-count="3"] .token,.stack[data-count="4"] .token{width:40%;height:40%;}
+
+  /* Finished tokens fan out across the whole 3x3 center square instead of one tiny cell */
+  .stack-center{z-index:6;gap:3%;padding:6%;}
+  .stack-center .token{width:16%;height:16%;}
+  .stack-center[data-count="1"] .token{width:30%;height:30%;}
+  .stack-center[data-count="2"] .token{width:24%;height:24%;}
+  .stack-center[data-count="3"] .token{width:21%;height:21%;}
+  .stack-center[data-count="4"] .token{width:19%;height:19%;}
+  .token.c-red{background:radial-gradient(circle at 35% 30%, #ff8b7f, var(--red) 60%, var(--red-dk));}
+  .token.c-green{background:radial-gradient(circle at 35% 30%, #74d98d, var(--green) 60%, var(--green-dk));}
+  .token.c-yellow{background:radial-gradient(circle at 35% 30%, #ffe58a, var(--yellow) 60%, var(--yellow-dk));}
+  .token.c-blue{background:radial-gradient(circle at 35% 30%, #8fb4ff, var(--blue) 60%, var(--blue-dk));}
+  .token.movable{cursor:pointer;animation:pulse 1s infinite;}
+  .token.movable:hover{transform:scale(1.18);}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 2px 3px rgba(0,0,0,.45), 0 0 0 0 rgba(255,255,255,.6);}
+    50%{box-shadow:0 2px 3px rgba(0,0,0,.45), 0 0 0 6px rgba(255,255,255,0);}
+  }
+
+  /* ---------- Side panel ---------- */
+  .side{width:min(92vw,340px);display:flex;flex-direction:column;gap:16px;touch-action:manipulation;}
+  .panel{
+    background:var(--panel);border:1px solid var(--panel-border);border-radius:18px;padding:16px;
+  }
+  .players{display:flex;flex-direction:column;gap:10px;}
+  .player-card{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;
+    background:var(--panel-2);border:2px solid transparent;transition:.15s;
+  }
+  .player-card.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,216,201,.18);}
+  .player-card .pc-dot{width:20px;height:20px;border-radius:50%;flex:none;box-shadow:inset 0 -2px 2px rgba(0,0,0,.25);}
+  .pc-dot.red{background:var(--red);} .pc-dot.green{background:var(--green);}
+  .pc-dot.yellow{background:var(--yellow);} .pc-dot.blue{background:var(--blue);}
+  .player-card .pc-info{flex:1;min-width:0;}
+  .player-card .pc-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .player-card .pc-status{font-size:11px;color:var(--ink-dim);}
+  .player-card .pc-turn{font-size:11px;color:var(--accent);font-weight:800;opacity:0;}
+  .player-card.active .pc-turn{opacity:1;}
+
+  .dice-panel{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .dice-turn-label{font-family:'Baloo 2';font-weight:700;font-size:15px;text-align:center;}
+  .dice-turn-label span{padding:2px 8px;border-radius:8px;}
+  .dice{
+    width:72px;height:72px;border-radius:16px;background:var(--cream);
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    padding:11px;box-shadow:0 8px 18px rgba(0,0,0,.35), inset 0 -3px 4px rgba(0,0,0,.12);
+    transition:transform .12s;
+  }
+  .dice.rolling{animation:shake .12s infinite;}
+  @keyframes shake{
+    0%{transform:rotate(-6deg);} 50%{transform:rotate(6deg);} 100%{transform:rotate(-6deg);}
+  }
+  .pip{border-radius:50%;background:#1c2440;opacity:0;align-self:center;justify-self:center;width:70%;height:70%;}
+  .pip.active{opacity:1;}
+  .roll-btn{
+    background:linear-gradient(180deg,var(--gold),#d8a72c);color:#3a2705;border:none;
+    padding:11px 26px;border-radius:12px;font-family:'Baloo 2';font-weight:700;font-size:15px;
+    cursor:pointer;box-shadow:0 8px 18px rgba(242,201,76,.25);transition:.15s;
+  }
+  .roll-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}
+  .roll-btn:not(:disabled):hover{transform:translateY(-2px);}
+  .hint{font-size:12.5px;color:var(--ink-dim);text-align:center;min-height:16px;}
+
+  .log-panel h3{margin:0 0 8px;font-family:'Baloo 2';font-size:14px;color:var(--ink-dim);letter-spacing:.3px;}
+  .log{max-height:150px;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:6px;font-size:12.5px;}
+  .log div{color:var(--ink-dim);line-height:1.4;}
+  .log div b{color:var(--ink);}
+  .log::-webkit-scrollbar{width:6px;}
+  .log::-webkit-scrollbar-thumb{background:var(--panel-border);border-radius:4px;}
+
+  /* ---------- Win modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(8,10,20,.72);display:none;
+    align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--panel);border:1px solid var(--panel-border);border-radius:22px;
+    padding:36px 30px;text-align:center;max-width:360px;box-shadow:0 30px 80px rgba(0,0,0,.5);
+  }
+  .modal .emoji{font-size:44px;margin-bottom:8px;}
+  .modal h2{font-family:'Baloo 2';font-size:24px;margin:0 0 6px;}
+  .modal p{color:var(--ink-dim);margin:0 0 22px;font-size:14px;}
+  .modal button{
+    background:linear-gradient(180deg,var(--accent),#33b6a8);color:#04231e;border:none;
+    padding:12px 28px;border-radius:12px;font-family:'Baloo 2';font-weight:700;font-size:15px;cursor:pointer;
+  }
+
+  @media (max-width:480px){
+    .panel{padding:12px;border-radius:14px;}
+    .player-card{padding:8px 10px;gap:8px;}
+    .dice{width:60px;height:60px;padding:9px;}
+    .roll-btn{padding:10px 22px;font-size:14px;}
+    .side{gap:12px;}
+    .game{gap:14px;}
+    .board-wrap{border-radius:18px;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="titlebar">
+    <div class="brand">
+      <div class="dot-cluster"><span></span><span></span><span></span><span></span></div>
+      <h1>Lu<span>d</span>o</h1>
+    </div>
+    <button class="new-game-btn" id="newGameTop" style="display:none;">↺ New game</button>
+  </div>
+
+  <!-- SETUP SCREEN -->
+  <div class="setup" id="setup">
+    <h2>Gather your players</h2>
+    <p class="sub">Pick how many are playing, roll the dice, and race four tokens home.</p>
+    <div class="count-row" id="countRow">
+      <button class="count-btn" data-n="2">2<small>players</small></button>
+      <button class="count-btn" data-n="3">3<small>players</small></button>
+      <button class="count-btn selected" data-n="4">4<small>players</small></button>
+    </div>
+    <div class="name-grid" id="nameGrid"></div>
+    <button type="button" class="fill-cpu-btn" id="fillCpuBtn">🤖 Make everyone else a computer</button>
+    <button class="start-btn" id="startBtn">Start Game</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div class="game" id="game">
+    <div class="board-wrap">
+      <div class="board" id="board"></div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <div class="players" id="players"></div>
+      </div>
+      <div class="panel dice-panel">
+        <div class="dice-turn-label" id="turnLabel">—</div>
+        <div class="dice" id="dice">
+          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
+        </div>
+        <button class="roll-btn" id="rollBtn">Roll Dice</button>
+        <div class="hint" id="hint">Roll a 6 to bring a token out of the yard.</div>
+      </div>
+      <div class="panel log-panel">
+        <h3>GAME LOG</h3>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="winOverlay">
+  <div class="modal">
+    <div class="emoji">🎉</div>
+    <h2 id="winTitle">Winner!</h2>
+    <p>All four tokens made it home first.</p>
+    <button id="playAgainBtn">Play Again</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ BOARD GEOMETRY ============ */
+  const PATH = [
+    [6,1],[6,2],[6,3],[6,4],[6,5],[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],[0,7],[0,8],
+    [1,8],[2,8],[3,8],[4,8],[5,8],[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],[7,14],
+    [8,14],[8,13],[8,12],[8,11],[8,10],[8,9],[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],
+    [14,7],[14,6],[13,6],[12,6],[11,6],[10,6],[9,6],[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],
+    [7,0],[6,0]
+  ];
+  const COLORS = ['red','green','yellow','blue'];
+  const START_INDEX = {red:0, green:13, yellow:26, blue:39};
+  const HOME_ENTRY = {
+    red:    [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
+    green:  [[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],
+    yellow: [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
+    blue:   [[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]]
+  };
+  const YARD_SLOTS = {
+    red:    [[1,1],[1,3],[3,1],[3,3]],
+    green:  [[1,10],[1,12],[3,10],[3,12]],
+    yellow: [[10,10],[10,12],[12,10],[12,12]],
+    blue:   [[10,1],[10,3],[12,1],[12,3]]
+  };
+  const SAFE_INDICES = [0,8,13,21,26,34,39,47];
+  const SAFE_COORDS = new Set(SAFE_INDICES.map(i => PATH[i].join(',')));
+  const CENTER = [7,7];
+  const PIP_MAP = {
+    1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]
+  };
+  const NAME_DEFAULT = {red:'Red', green:'Green', yellow:'Yellow', blue:'Blue'};
+  const EMOJI = {red:'🔴', green:'🟢', yellow:'🟡', blue:'🔵'};
+
+  function coordOf(color, pos, tokenIdx){
+    if (pos === -1) return YARD_SLOTS[color][tokenIdx];
+    if (pos <= 50) return PATH[(START_INDEX[color] + pos) % 52];
+    if (pos <= 56) return HOME_ENTRY[color][pos - 51];
+    return CENTER;
+  }
+
+  /* ============ STATE ============ */
+  let state = null;
+
+  function freshState(numPlayers, names, aiFlags){
+    const players = [];
+    for (let i = 0; i < numPlayers; i++){
+      const color = COLORS[i];
+      players.push({
+        color,
+        name: (names[i] && names[i].trim()) ? names[i].trim() : NAME_DEFAULT[color],
+        isAI: !!(aiFlags && aiFlags[i]),
+        tokens: [{pos:-1},{pos:-1},{pos:-1},{pos:-1}],
+        finished:false
+      });
+    }
+    return {
+      players,
+      currentPlayerIndex: 0,
+      diceValue: null,
+      consecutiveSixes: 0,
+      movableTokenIdxs: [],
+      canRoll: true,
+      awaitingSelection: false,
+      gameOver: false,
+      rolling:false,
+      animating:false
+    };
+  }
+
+  /* ============ SETUP SCREEN ============ */
+  const countRow = document.getElementById('countRow');
+  const nameGrid = document.getElementById('nameGrid');
+  let selectedCount = 4;
+
+  function renderNameFields(){
+    nameGrid.innerHTML = '';
+    for (let i = 0; i < selectedCount; i++){
+      const color = COLORS[i];
+      const field = document.createElement('div');
+      field.className = 'name-field';
+      field.innerHTML = `<span class="swatch" style="background:var(--${color})"></span>
+        <input type="text" maxlength="14" placeholder="${NAME_DEFAULT[color]}" data-color="${color}">
+        <button type="button" class="ai-toggle" data-color="${color}" data-ai="false" title="Tap to switch between Human and Computer">👤 Human</button>`;
+      nameGrid.appendChild(field);
+    }
+  }
+  renderNameFields();
+
+  countRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('.count-btn');
+    if (!btn) return;
+    selectedCount = parseInt(btn.dataset.n, 10);
+    [...countRow.children].forEach(b => b.classList.toggle('selected', b === btn));
+    renderNameFields();
+  });
+
+  nameGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ai-toggle');
+    if (!btn) return;
+    const isAI = btn.dataset.ai === 'true';
+    btn.dataset.ai = isAI ? 'false' : 'true';
+    btn.textContent = isAI ? '👤 Human' : '🤖 CPU';
+    btn.classList.toggle('is-ai', !isAI);
+  });
+
+  document.getElementById('fillCpuBtn').addEventListener('click', () => {
+    const toggles = [...nameGrid.querySelectorAll('.ai-toggle')];
+    toggles.forEach((btn, i) => {
+      if (i === 0) return; // keep the first player human
+      btn.dataset.ai = 'true';
+      btn.textContent = '🤖 CPU';
+      btn.classList.add('is-ai');
+    });
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    const inputs = [...nameGrid.querySelectorAll('input')];
+    const toggles = [...nameGrid.querySelectorAll('.ai-toggle')];
+    const names = inputs.map(i => i.value);
+    const aiFlags = toggles.map(b => b.dataset.ai === 'true');
+    state = freshState(selectedCount, names, aiFlags);
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('game').classList.add('active');
+    document.getElementById('newGameTop').style.display = 'inline-block';
+    buildBoardOnce();
+    renderPlayers();
+    renderTokens();
+    updateTurnUI();
+  });
+
+  document.getElementById('newGameTop').addEventListener('click', resetToSetup);
+  document.getElementById('playAgainBtn').addEventListener('click', () => {
+    document.getElementById('winOverlay').classList.remove('show');
+    resetToSetup();
+  });
+
+  function resetToSetup(){
+    document.getElementById('game').classList.remove('active');
+    document.getElementById('setup').style.display = 'block';
+    document.getElementById('newGameTop').style.display = 'none';
+    document.getElementById('log').innerHTML = '';
+  }
+
+  /* ============ BOARD BUILD (static cells, once) ============ */
+  const boardEl = document.getElementById('board');
+  let cellLayer = null;
+  let tokenLayer = null;
+
+  function buildBoardOnce(){
+    boardEl.innerHTML = '';
+
+    // yards
+    COLORS.forEach(color => {
+      const y = document.createElement('div');
+      y.className = 'yard ' + color;
+      let rowStart, colStart;
+      if (color === 'red'){rowStart=1;colStart=1;}
+      if (color === 'green'){rowStart=1;colStart=10;}
+      if (color === 'yellow'){rowStart=10;colStart=10;}
+      if (color === 'blue'){rowStart=10;colStart=1;}
+      y.style.gridRow = `${rowStart} / ${rowStart+6}`;
+      y.style.gridColumn = `${colStart} / ${colStart+6}`;
+      boardEl.appendChild(y);
+    });
+
+    // center home
+    const center = document.createElement('div');
+    center.className = 'center-home';
+    center.innerHTML = `<div class="tri top"></div><div class="tri right"></div>
+      <div class="tri bottom"></div><div class="tri left"></div><div class="flag">🏁</div>`;
+    boardEl.appendChild(center);
+
+    // path cells
+    const startCoordSet = {};
+    COLORS.forEach(c => startCoordSet[PATH[START_INDEX[c]].join(',')] = c);
+
+    PATH.forEach((coord, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.gridRow = `${coord[0]+1} / ${coord[0]+2}`;
+      cell.style.gridColumn = `${coord[1]+1} / ${coord[1]+2}`;
+      const key = coord.join(',');
+      if (startCoordSet[key]) cell.classList.add('path-' + startCoordSet[key]);
+      if (SAFE_COORDS.has(key)) cell.classList.add('safe');
+      boardEl.appendChild(cell);
+    });
+
+    // home-stretch cells
+    COLORS.forEach(color => {
+      HOME_ENTRY[color].forEach(coord => {
+        const cell = document.createElement('div');
+        cell.className = 'cell home-' + color;
+        cell.style.gridRow = `${coord[0]+1} / ${coord[0]+2}`;
+        cell.style.gridColumn = `${coord[1]+1} / ${coord[1]+2}`;
+        boardEl.appendChild(cell);
+      });
+    });
+
+    // token layer container (kept simple: stacks appended directly to board)
+    tokenLayer = boardEl;
+  }
+
+  /* ============ TOKEN RENDERING ============ */
+  // hoppingRef: {playerIdx,tokenIdx} of a token currently taking one animated step
+  // capturedRefs: array of {playerIdx,tokenIdx} that just got sent home and should pop in
+  function renderTokens(hoppingRef, capturedRefs){
+    hoppingRef = hoppingRef || null;
+    capturedRefs = capturedRefs || [];
+
+    // remove old stacks
+    boardEl.querySelectorAll('.stack').forEach(s => s.remove());
+
+    const groups = new Map(); // coordKey -> [{playerIdx, tokenIdx, color}]
+    state.players.forEach((p, pi) => {
+      p.tokens.forEach((t, ti) => {
+        const coord = coordOf(p.color, t.pos, ti);
+        const key = coord.join(',');
+        if (!groups.has(key)) groups.set(key, {coord, items:[]});
+        groups.get(key).items.push({playerIdx:pi, tokenIdx:ti, color:p.color, pos:t.pos});
+      });
+    });
+
+    groups.forEach(group => {
+      const stack = document.createElement('div');
+      const isCenter = group.coord[0] === CENTER[0] && group.coord[1] === CENTER[1];
+      stack.className = isCenter ? 'stack stack-center' : 'stack';
+      stack.dataset.count = group.items.length;
+      if (isCenter){
+        // Finished tokens get the whole 3x3 center area to fan out in, not a single path cell.
+        stack.style.gridRow = '7 / 10';
+        stack.style.gridColumn = '7 / 10';
+      } else {
+        stack.style.gridRow = `${group.coord[0]+1} / ${group.coord[0]+2}`;
+        stack.style.gridColumn = `${group.coord[1]+1} / ${group.coord[1]+2}`;
+      }
+
+      group.items.forEach(item => {
+        const tok = document.createElement('div');
+        tok.className = `token c-${item.color}`;
+        if (hoppingRef && item.playerIdx === hoppingRef.playerIdx && item.tokenIdx === hoppingRef.tokenIdx){
+          tok.classList.add('hopping');
+        }
+        if (capturedRefs.some(r => r.playerIdx === item.playerIdx && r.tokenIdx === item.tokenIdx)){
+          tok.classList.add('capture-pop');
+        }
+        const isMovable = state.awaitingSelection &&
+          item.playerIdx === state.currentPlayerIndex &&
+          !state.players[state.currentPlayerIndex].isAI &&
+          state.movableTokenIdxs.includes(item.tokenIdx);
+        if (isMovable){
+          tok.classList.add('movable');
+          tok.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleTokenClick(item.tokenIdx);
+          });
+        }
+        stack.appendChild(tok);
+      });
+      boardEl.appendChild(stack);
+    });
+  }
+
+  function wait(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Moves a token one cell at a time so the player can see it hop across the dice count.
+  async function animateTokenMove(playerIdx, tokenIdx, dice, wasInYard){
+    const token = state.players[playerIdx].tokens[tokenIdx];
+    const ref = {playerIdx, tokenIdx};
+
+    if (wasInYard){
+      token.pos = 0;
+      renderTokens(ref);
+      await wait(260);
+      return;
+    }
+
+    const startPos = token.pos;
+    for (let step = 1; step <= dice; step++){
+      token.pos = startPos + step;
+      renderTokens(ref);
+      await wait(190);
+    }
+  }
+
+  /* ============ PLAYERS PANEL ============ */
+  function renderPlayers(){
+    const wrap = document.getElementById('players');
+    wrap.innerHTML = '';
+    state.players.forEach((p, i) => {
+      const homeCount = p.tokens.filter(t => t.pos === 57).length;
+      const card = document.createElement('div');
+      card.className = 'player-card' + (i === state.currentPlayerIndex ? ' active' : '');
+      card.innerHTML = `
+        <span class="pc-dot ${p.color}"></span>
+        <span class="pc-info">
+          <div class="pc-name">${escapeHtml(p.name)} ${p.isAI ? '🤖' : ''}</div>
+          <div class="pc-status">${homeCount}/4 home${p.isAI ? ' · Computer' : ''}</div>
+        </span>
+        <span class="pc-turn">TURN</span>`;
+      wrap.appendChild(card);
+    });
+  }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* ============ DICE ============ */
+  const diceEl = document.getElementById('dice');
+  const pips = [...diceEl.querySelectorAll('.pip')];
+  const rollBtn = document.getElementById('rollBtn');
+  const hintEl = document.getElementById('hint');
+  const turnLabelEl = document.getElementById('turnLabel');
+
+  function setDiceFace(value){
+    pips.forEach((p, i) => p.classList.toggle('active', PIP_MAP[value].includes(i)));
+  }
+  setDiceFace(1);
+
+  function updateTurnUI(){
+    const p = state.players[state.currentPlayerIndex];
+    turnLabelEl.innerHTML = `<span style="background:var(--${p.color});color:#1a1200;">${escapeHtml(p.name)}'s turn</span>`;
+    const humansTurn = !p.isAI;
+    rollBtn.disabled = !state.canRoll || state.gameOver || !humansTurn;
+    if (state.gameOver){
+      rollBtn.textContent = 'Roll Dice';
+    } else if (!humansTurn){
+      rollBtn.textContent = '🤖 CPU turn';
+      if (state.canRoll) hintEl.textContent = `🤖 ${escapeHtml(p.name)} is taking its turn…`;
+    } else {
+      rollBtn.textContent = state.canRoll ? 'Roll Dice' : 'Move a token';
+    }
+    renderPlayers();
+    checkAITurn();
+  }
+
+  function checkAITurn(){
+    if (state.gameOver || state.rolling || state.animating || !state.canRoll) return;
+    const p = state.players[state.currentPlayerIndex];
+    if (!p.isAI) return;
+    setTimeout(() => { if (state.canRoll && !state.gameOver) doRoll(); }, 800);
+  }
+
+  function doRoll(){
+    if (!state.canRoll || state.rolling || state.gameOver) return;
+    state.rolling = true;
+    rollBtn.disabled = true;
+    diceEl.classList.add('rolling');
+    hintEl.textContent = 'Rolling…';
+
+    let ticks = 0;
+    const maxTicks = 10;
+    const spin = setInterval(() => {
+      setDiceFace(1 + Math.floor(Math.random() * 6));
+      ticks++;
+      if (ticks >= maxTicks){
+        clearInterval(spin);
+        finishRoll();
+      }
+    }, 60);
+  }
+  rollBtn.addEventListener('click', doRoll);
+
+  function finishRoll(){
+    diceEl.classList.remove('rolling');
+    const value = 1 + Math.floor(Math.random() * 6);
+    setDiceFace(value);
+    state.diceValue = value;
+    state.rolling = false;
+
+    const player = state.players[state.currentPlayerIndex];
+
+    if (value === 6){
+      state.consecutiveSixes++;
+    } else {
+      state.consecutiveSixes = 0;
+    }
+
+    if (state.consecutiveSixes === 3){
+      log(`<b>${escapeHtml(player.name)}</b> rolled three 6s in a row — turn forfeited!`);
+      state.consecutiveSixes = 0;
+      state.canRoll = false;
+      setTimeout(() => advanceTurn(false), 900);
+      return;
+    }
+
+    log(`<b>${escapeHtml(player.name)}</b> rolled a <b>${value}</b>.`);
+
+    const movable = getMovableTokens(player, value);
+    state.movableTokenIdxs = movable;
+
+    if (movable.length === 0){
+      hintEl.textContent = 'No valid moves this turn.';
+      state.canRoll = false;
+      setTimeout(() => advanceTurn(value === 6), 900);
+      return;
+    }
+
+    state.awaitingSelection = true;
+    state.canRoll = false;
+    updateTurnUI();
+    renderTokens();
+
+    if (movable.length === 1){
+      hintEl.textContent = player.isAI ? `🤖 ${escapeHtml(player.name)} moves its only option…` : 'Moving your only available token…';
+      setTimeout(() => handleTokenClick(movable[0]), 500);
+    } else if (player.isAI){
+      hintEl.textContent = `🤖 ${escapeHtml(player.name)} is thinking…`;
+      const choice = aiChooseToken(player, movable, value);
+      setTimeout(() => handleTokenClick(choice), 700);
+    } else {
+      hintEl.textContent = 'Tap a glowing token to move it.';
+    }
+  }
+
+  // Simple heuristic AI: prefers captures, then finishing a token, then leaving the yard,
+  // then whichever token has traveled furthest — falls back to a random legal move.
+  function aiChooseToken(player, movableIdxs, dice){
+    let best = null;
+    let bestScore = -Infinity;
+    const ties = [];
+
+    movableIdxs.forEach(idx => {
+      const token = player.tokens[idx];
+      const newPos = token.pos === -1 ? 0 : token.pos + dice;
+      let score = newPos * 0.5;
+
+      if (token.pos === -1) score += 12;
+      if (newPos === 57) score += 60;
+
+      if (newPos >= 0 && newPos <= 50){
+        const coord = PATH[(START_INDEX[player.color] + newPos) % 52];
+        const key = coord.join(',');
+        if (!SAFE_COORDS.has(key)){
+          state.players.forEach((op, opi) => {
+            if (opi === state.currentPlayerIndex) return;
+            op.tokens.forEach(ot => {
+              if (ot.pos >= 0 && ot.pos <= 50){
+                const ocoord = PATH[(START_INDEX[op.color] + ot.pos) % 52];
+                if (ocoord.join(',') === key) score += 100;
+              }
+            });
+          });
+        }
+      }
+
+      if (score > bestScore){
+        bestScore = score;
+        best = idx;
+        ties.length = 0;
+        ties.push(idx);
+      } else if (score === bestScore){
+        ties.push(idx);
+      }
+    });
+
+    return ties.length ? ties[Math.floor(Math.random() * ties.length)] : best;
+  }
+
+  function getMovableTokens(player, dice){
+    const idxs = [];
+    player.tokens.forEach((t, i) => {
+      if (t.pos === -1){
+        if (dice === 6) idxs.push(i);
+      } else if (t.pos < 57){
+        if (t.pos + dice <= 57) idxs.push(i);
+      }
+    });
+    return idxs;
+  }
+
+  async function handleTokenClick(tokenIdx){
+    if (!state.awaitingSelection || state.animating) return;
+    if (!state.movableTokenIdxs.includes(tokenIdx)) return;
+    state.awaitingSelection = false;
+    state.animating = true;
+    state.canRoll = false;
+    hintEl.textContent = '';
+    updateTurnUI();
+    renderTokens(); // drop the "movable" glow immediately so nothing else is tappable
+
+    const playerIdx = state.currentPlayerIndex;
+    const player = state.players[playerIdx];
+    const token = player.tokens[tokenIdx];
+    const dice = state.diceValue;
+    const wasInYard = token.pos === -1;
+
+    // step-by-step hop across the board, one cell per pip on the dice
+    await animateTokenMove(playerIdx, tokenIdx, dice, wasInYard);
+
+    let captured = false;
+    const capturedRefs = [];
+    if (token.pos >= 0 && token.pos <= 50){
+      const coord = PATH[(START_INDEX[player.color] + token.pos) % 52];
+      const key = coord.join(',');
+      if (!SAFE_COORDS.has(key)){
+        state.players.forEach((op, opi) => {
+          if (opi === playerIdx) return;
+          op.tokens.forEach((ot, oti) => {
+            if (ot.pos >= 0 && ot.pos <= 50){
+              const ocoord = PATH[(START_INDEX[op.color] + ot.pos) % 52];
+              if (ocoord.join(',') === key){
+                ot.pos = -1;
+                captured = true;
+                capturedRefs.push({playerIdx:opi, tokenIdx:oti});
+                log(`<b>${escapeHtml(player.name)}</b> sent <b>${escapeHtml(op.name)}</b>'s token back to the yard!`);
+              }
+            }
+          });
+        });
+      }
+    }
+
+    const reachedHome = token.pos === 57;
+    if (wasInYard) log(`<b>${escapeHtml(player.name)}</b> brought a token onto the board.`);
+    if (reachedHome) log(`<b>${escapeHtml(player.name)}</b> got a token all the way home! 🏠`);
+
+    renderTokens(null, capturedRefs);
+    renderPlayers();
+    state.animating = false;
+
+    if (checkWin(player)){
+      setTimeout(() => showWin(player), 500);
+      return;
+    }
+
+    const extraTurn = (dice === 6 && state.consecutiveSixes < 3) || captured || reachedHome;
+    setTimeout(() => advanceTurn(extraTurn), 500);
+  }
+
+  function checkWin(player){
+    return player.tokens.every(t => t.pos === 57);
+  }
+
+  function showWin(player){
+    state.gameOver = true;
+    document.getElementById('winTitle').textContent = `${player.name} wins! ${EMOJI[player.color]}`;
+    document.getElementById('winOverlay').classList.add('show');
+  }
+
+  function advanceTurn(extraTurn){
+    state.diceValue = null;
+    state.movableTokenIdxs = [];
+    state.awaitingSelection = false;
+
+    if (!extraTurn){
+      state.consecutiveSixes = 0;
+      let next = state.currentPlayerIndex;
+      do {
+        next = (next + 1) % state.players.length;
+      } while (state.players[next].finished && next !== state.currentPlayerIndex);
+      state.currentPlayerIndex = next;
+    } else {
+      hintEl.textContent = 'Bonus roll! Go again.';
+    }
+
+    state.canRoll = true;
+    if (!extraTurn) hintEl.textContent = 'Roll a 6 to bring a token out of the yard.';
+    updateTurnUI();
+    renderTokens();
+  }
+
+  /* ============ LOG ============ */
+  const logEl = document.getElementById('log');
+  function log(html){
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+})();
+</script>
+</body>
+</html>

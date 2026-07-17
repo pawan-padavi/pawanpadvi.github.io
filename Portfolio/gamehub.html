@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Game Hub</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Segoe UI,Arial,sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg,#0f172a,#1e293b,#111827);
+            color: white;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+            header h1 {
+                font-size: 3rem;
+                margin-bottom: 10px;
+            }
+
+            header p {
+                color: #cbd5e1;
+                font-size: 18px;
+            }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(320px,1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,.35);
+            transition: 0.3s;
+        }
+
+            .card:hover {
+                transform: translateY(-10px);
+                box-shadow: 0 15px 35px rgba(34,197,94,.35);
+            }
+
+        .game-icon {
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 100px;
+            background: #0f172a;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+            .content h2 {
+                margin-bottom: 15px;
+            }
+
+            .content p {
+                color: #cbd5e1;
+                line-height: 1.6;
+                margin-bottom: 25px;
+            }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            text-decoration: none;
+            color: white;
+            background: #22c55e;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: .3s;
+        }
+
+            .btn:hover {
+                background: #16a34a;
+            }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #94a3b8;
+        }
+    </style>
+
+</head>
+<body>
+
+    <header>
+        <h1>🎮 Game Hub</h1>
+        <p>Select your favorite game and start playing!</p>
+    </header>
+
+    <div class="container">
+
+        <div class="games">
+
+            <!-- Snake Game -->
+            <div class="card">
+
+                <div class="game-icon">
+                    🐍
+                </div>
+
+                <div class="content">
+                    <h2>Snake Game</h2>
+
+                    <p>
+                        Eat food, grow longer, avoid crashing into the walls
+                        or yourself, and achieve the highest score.
+                    </p>
+
+                    <a href="Portfolio/snake-arcade.html" class="btn">
+                        ▶ Play Now
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Ludo Game -->
+            <div class="card">
+
+                <div class="game-icon">
+                    🎲
+                </div>
+
+                <div class="content">
+                    <h2>Ludo Game</h2>
+
+                    <p>
+                        Play the classic Ludo board game with friends and
+                        family. Roll the dice and race to victory.
+                    </p>
+
+                    <a href="Portfolio/ludo-game.html" class="btn">
+                        ▶ Play Now
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <footer>
+        🎮 Game Hub | Made with ❤️ by Pawansing Padvi
+    </footer>
+
+</body>
+</html>
