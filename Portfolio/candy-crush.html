@@ -42,12 +42,12 @@
     display:flex;
     align-items:flex-start;
     justify-content:center;
-    padding: max(16px, var(--safe-t)) 16px max(16px, var(--safe-b));
+    padding: max(10px, var(--safe-t)) 10px max(10px, var(--safe-b));
   }
 
   .wrap{
     width:100%;
-    max-width:520px;
+    max-width:560px;
   }
 
   .screen.hidden{ display:none; }
@@ -340,7 +340,7 @@
     transform: rotate(-18deg);
   }
   .candy .emoji{
-    font-size: clamp(1.0rem, 3.2vw, 1.5rem);
+    font-size: clamp(1.05rem, 4.6vw, 1.7rem);
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.25));
     position:relative;
     z-index:1;
@@ -492,16 +492,16 @@
     margin-top:14px;
   }
 
-  @media (max-width: 380px){
-    .app{ padding: 12px; }
-    .title h1{ font-size: 1.7rem; }
-    .title p{ font-size: 0.8rem; }
-    .stat{ padding: 8px 6px; }
-    .stat .label{ font-size: 0.6rem; }
-    .stat .value{ font-size: 1.15rem; }
-    .board-shell{ padding: 8px; }
-    #board{ gap: 4px; }
-    .tile{ border-radius: 9px; }
+  @media (max-width: 480px){
+    .app{ padding: max(6px, var(--safe-t)) 6px max(6px, var(--safe-b)); }
+    .title h1{ font-size: 1.6rem; }
+    .title p{ font-size: 0.78rem; }
+    .stat{ padding: 8px 4px; }
+    .stat .label{ font-size: 0.58rem; }
+    .stat .value{ font-size: 1.1rem; }
+    .board-shell{ padding: 5px; border-radius: 16px; }
+    #board{ gap: 3px; }
+    .tile{ border-radius: 8px; }
     .level-node{ width:56px; height:56px; font-size:1rem; }
   }
 </style>
