@@ -83,6 +83,30 @@
                 opacity: 0.85;
             }
 
+        .mute-btn {
+            position: absolute;
+            top: 6px;
+            right: 2px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--gold-trim-dim);
+            background: linear-gradient(180deg, #3a1420 0%, #200a12 100%);
+            color: var(--gold-trim);
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 0 rgba(0,0,0,0.5);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+            .mute-btn:active {
+                transform: translateY(2px);
+                box-shadow: none;
+            }
+
         @keyframes flicker {
             0%, 3%, 6%, 100% {
                 opacity: 1;
@@ -334,6 +358,7 @@
 
     <div class="cabinet">
         <div class="marquee">
+            <button class="mute-btn" id="muteBtn" title="Toggle sound">🔊</button>
             <h1>SNAKE</h1>
             <div class="tagline">Phosphor Arcade &middot; Est. 2026</div>
         </div>
@@ -390,298 +415,364 @@
         </div>
     </div>
 
-    <script>(() => {
-  const COLS = 22, ROWS = 22;
-  const canvas = document.getElementById('board');
-  const ctx = canvas.getContext('2d');
+    <script>
+        (() => {
+            const COLS = 22, ROWS = 22;
+            const canvas = document.getElementById('board');
+            const ctx = canvas.getContext('2d');
 
-  const scoreEl = document.getElementById('score');
-  const highScoreEl = document.getElementById('highScore');
-  const levelEl = document.getElementById('level');
-  const startOverlay = document.getElementById('startOverlay');
-  const overOverlay = document.getElementById('overOverlay');
-  const pauseOverlay = document.getElementById('pauseOverlay');
-  const finalScoreText = document.getElementById('finalScoreText');
+            const scoreEl = document.getElementById('score');
+            const highScoreEl = document.getElementById('highScore');
+            const levelEl = document.getElementById('level');
+            const startOverlay = document.getElementById('startOverlay');
+            const overOverlay = document.getElementById('overOverlay');
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            const finalScoreText = document.getElementById('finalScoreText');
 
-  const HIGH_KEY = 'snakeArcadeHighScore';
-  let highScore = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10);
-  highScoreEl.textContent = String(highScore).padStart(3, '0');
+            const HIGH_KEY = 'snakeArcadeHighScore';
+            let highScore = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10);
+            highScoreEl.textContent = String(highScore).padStart(3, '0');
 
-  let cellSize = 0;
-  function resizeCanvas() {
-    const frame = canvas.parentElement;
-    const size = frame.clientWidth - 16; // account for frame padding
-    canvas.width = size * devicePixelRatio;
-    canvas.height = size * devicePixelRatio;
-    canvas.style.width = size + 'px';
-    canvas.style.height = size + 'px';
-    cellSize = canvas.width / COLS;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-  }
-  window.addEventListener('resize', resizeCanvas);
+            // ---------- Chiptune sound engine (Web Audio API, synthesized — no files) ----------
+            const muteBtn = document.getElementById('muteBtn');
+            const MUTE_KEY = 'snakeArcadeMuted';
+            let muted = localStorage.getItem(MUTE_KEY) === '1';
+            muteBtn.textContent = muted ? '🔇' : '🔊';
 
-  let snake, dir, nextDir, food, score, level, tickMs, acc, lastTime, state, foodPulse;
+            let actx = null;
+            function ensureAudio() {
+                if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+                if (actx.state === 'suspended') actx.resume();
+            }
 
-  function reset() {
-    const cx = Math.floor(COLS / 2), cy = Math.floor(ROWS / 2);
-    snake = [{x: cx, y: cy}, {x: cx - 1, y: cy}, {x: cx - 2, y: cy}];
-    dir = {x: 1, y: 0};
-    nextDir = {x: 1, y: 0};
-    score = 0;
-    level = 1;
-    tickMs = 140;
-    acc = 0;
-    lastTime = performance.now();
-    foodPulse = 0;
-    spawnFood();
-    updateHud();
-  }
+            function playTone({ freq = 440, duration = 0.1, type = 'square', peak = 0.15, glideTo = null, delay = 0 }) {
+                if (muted || !actx) return;
+                const t0 = actx.currentTime + delay;
+                const osc = actx.createOscillator();
+                const gain = actx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, t0);
+                if (glideTo !== null) osc.frequency.exponentialRampToValueAtTime(Math.max(30, glideTo), t0 + duration);
+                gain.gain.setValueAtTime(0, t0);
+                gain.gain.linearRampToValueAtTime(peak, t0 + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+                osc.connect(gain).connect(actx.destination);
+                osc.start(t0);
+                osc.stop(t0 + duration + 0.02);
+            }
 
-  function spawnFood() {
-    let pos;
-    do {
-      pos = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
-    } while (snake.some(s => s.x === pos.x && s.y === pos.y));
-    food = pos;
-  }
+            function playEat() {
+                playTone({ freq: 523, duration: 0.06, type: 'square', peak: 0.16 });
+                playTone({ freq: 784, duration: 0.09, type: 'square', peak: 0.14, delay: 0.05 });
+            }
+            function playTurn() {
+                playTone({ freq: 220, duration: 0.03, type: 'square', peak: 0.04 });
+            }
+            function playClick() {
+                playTone({ freq: 392, duration: 0.06, type: 'square', peak: 0.10 });
+            }
+            function playStart() {
+                [523, 659, 784, 1047].forEach((f, i) => playTone({ freq: f, duration: 0.09, type: 'square', peak: 0.14, delay: i * 0.07 }));
+            }
+            function playGameOver() {
+                [392, 349, 294, 220].forEach((f, i) => playTone({ freq: f, duration: 0.18, type: 'sawtooth', peak: 0.16, delay: i * 0.13 }));
+            }
 
-  function updateHud() {
-    scoreEl.textContent = String(score).padStart(3, '0');
-    levelEl.textContent = String(level);
-  }
+            muteBtn.addEventListener('click', () => {
+                ensureAudio();
+                muted = !muted;
+                localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
+                muteBtn.textContent = muted ? '🔇' : '🔊';
+                if (!muted) playClick();
+            });
 
-  function setDirection(nx, ny) {
-    if (state !== 'playing') return;
-    if (nx === -dir.x && ny === -dir.y) return; // no reversing
-    nextDir = { x: nx, y: ny };
-  }
+            let cellSize = 0;
+            function resizeCanvas() {
+                const frame = canvas.parentElement;
+                const size = frame.clientWidth - 16; // account for frame padding
+                canvas.width = size * devicePixelRatio;
+                canvas.height = size * devicePixelRatio;
+                canvas.style.width = size + 'px';
+                canvas.style.height = size + 'px';
+                cellSize = canvas.width / COLS;
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+            }
+            window.addEventListener('resize', resizeCanvas);
 
-  const KEY_MAP = {
-    ArrowUp: [0,-1], w: [0,-1], W: [0,-1],
-    ArrowDown: [0,1], s: [0,1], S: [0,1],
-    ArrowLeft: [-1,0], a: [-1,0], A: [-1,0],
-    ArrowRight: [1,0], d: [1,0], D: [1,0],
-  };
+            let snake, dir, nextDir, food, score, level, tickMs, acc, lastTime, state, foodPulse;
 
-  window.addEventListener('keydown', (e) => {
-    if (KEY_MAP[e.key]) {
-      e.preventDefault();
-      const [nx, ny] = KEY_MAP[e.key];
-      setDirection(nx, ny);
-    } else if (e.key === ' ' || e.key === 'Escape') {
-      togglePause();
-    }
-  });
+            function reset() {
+                const cx = Math.floor(COLS / 2), cy = Math.floor(ROWS / 2);
+                snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
+                dir = { x: 1, y: 0 };
+                nextDir = { x: 1, y: 0 };
+                score = 0;
+                level = 1;
+                tickMs = 140;
+                acc = 0;
+                lastTime = performance.now();
+                foodPulse = 0;
+                spawnFood();
+                updateHud();
+            }
 
-  document.querySelectorAll('.dpad button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const d = btn.dataset.dir;
-      if (d === 'up') setDirection(0,-1);
-      if (d === 'down') setDirection(0,1);
-      if (d === 'left') setDirection(-1,0);
-      if (d === 'right') setDirection(1,0);
-    });
-  });
+            function spawnFood() {
+                let pos;
+                do {
+                    pos = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
+                } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+                food = pos;
+            }
 
-  // Swipe controls
-  let touchStart = null;
-  canvas.addEventListener('touchstart', (e) => {
-    touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
-  }, { passive: true });
+            function updateHud() {
+                scoreEl.textContent = String(score).padStart(3, '0');
+                levelEl.textContent = String(level);
+            }
 
-  canvas.addEventListener('touchend', (e) => {
-    if (!touchStart) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - touchStart.x;
-    const dy = t.clientY - touchStart.y;
-    const dt = Date.now() - touchStart.t;
-    touchStart = null;
-    if (dt > 600) return; // too slow, ignore
-    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
-      togglePause(); // tap = pause
-      return;
-    }
-    if (Math.abs(dx) > Math.abs(dy)) {
-      setDirection(dx > 0 ? 1 : -1, 0);
-    } else {
-      setDirection(0, dy > 0 ? 1 : -1);
-    }
-  });
+            function setDirection(nx, ny) {
+                if (state !== 'playing') return;
+                if (nx === -dir.x && ny === -dir.y) return; // no reversing
+                if (nx === nextDir.x && ny === nextDir.y) return;
+                nextDir = { x: nx, y: ny };
+                playTurn();
+            }
 
-  function togglePause() {
-    if (state === 'playing') {
-      state = 'paused';
-      pauseOverlay.classList.remove('hidden');
-    } else if (state === 'paused') {
-      state = 'playing';
-      lastTime = performance.now();
-      pauseOverlay.classList.add('hidden');
-      requestAnimationFrame(loop);
-    }
-  }
+            const KEY_MAP = {
+                ArrowUp: [0, -1], w: [0, -1], W: [0, -1],
+                ArrowDown: [0, 1], s: [0, 1], S: [0, 1],
+                ArrowLeft: [-1, 0], a: [-1, 0], A: [-1, 0],
+                ArrowRight: [1, 0], d: [1, 0], D: [1, 0],
+            };
 
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && state === 'playing') togglePause();
-  });
+            window.addEventListener('keydown', (e) => {
+                ensureAudio();
+                if (KEY_MAP[e.key]) {
+                    e.preventDefault();
+                    const [nx, ny] = KEY_MAP[e.key];
+                    setDirection(nx, ny);
+                } else if (e.key === ' ' || e.key === 'Escape') {
+                    togglePause();
+                }
+            });
 
-  function startGame() {
-    reset();
-    state = 'playing';
-    startOverlay.classList.add('hidden');
-    overOverlay.classList.add('hidden');
-    pauseOverlay.classList.add('hidden');
-    lastTime = performance.now();
-    requestAnimationFrame(loop);
-  }
+            document.querySelectorAll('.dpad button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    ensureAudio();
+                    const d = btn.dataset.dir;
+                    if (d === 'up') setDirection(0, -1);
+                    if (d === 'down') setDirection(0, 1);
+                    if (d === 'left') setDirection(-1, 0);
+                    if (d === 'right') setDirection(1, 0);
+                });
+            });
 
-  document.getElementById('startBtn').addEventListener('click', startGame);
-  document.getElementById('restartBtn').addEventListener('click', startGame);
-  document.getElementById('resumeBtn').addEventListener('click', togglePause);
+            // Swipe controls
+            let touchStart = null;
+            canvas.addEventListener('touchstart', (e) => {
+                ensureAudio();
+                touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+            }, { passive: true });
 
-  function step() {
-    dir = nextDir;
-    const head = snake[0];
-    const newHead = { x: head.x + dir.x, y: head.y + dir.y };
+            canvas.addEventListener('touchend', (e) => {
+                if (!touchStart) return;
+                const t = e.changedTouches[0];
+                const dx = t.clientX - touchStart.x;
+                const dy = t.clientY - touchStart.y;
+                const dt = Date.now() - touchStart.t;
+                touchStart = null;
+                if (dt > 600) return; // too slow, ignore
+                if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
+                    togglePause(); // tap = pause
+                    return;
+                }
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    setDirection(dx > 0 ? 1 : -1, 0);
+                } else {
+                    setDirection(0, dy > 0 ? 1 : -1);
+                }
+            });
 
-    const hitWall = newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS;
-    const hitSelf = snake.some(s => s.x === newHead.x && s.y === newHead.y);
+            function togglePause() {
+                if (state === 'playing') {
+                    state = 'paused';
+                    pauseOverlay.classList.remove('hidden');
+                    playClick();
+                } else if (state === 'paused') {
+                    state = 'playing';
+                    lastTime = performance.now();
+                    pauseOverlay.classList.add('hidden');
+                    playClick();
+                    requestAnimationFrame(loop);
+                }
+            }
 
-    if (hitWall || hitSelf) {
-      endGame();
-      return;
-    }
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && state === 'playing') togglePause();
+            });
 
-    snake.unshift(newHead);
+            function startGame() {
+                ensureAudio();
+                reset();
+                state = 'playing';
+                startOverlay.classList.add('hidden');
+                overOverlay.classList.add('hidden');
+                pauseOverlay.classList.add('hidden');
+                lastTime = performance.now();
+                playStart();
+                requestAnimationFrame(loop);
+            }
 
-    if (newHead.x === food.x && newHead.y === food.y) {
-      score += 10;
-      if (score % 50 === 0) { level++; }
-      tickMs = Math.max(70, tickMs - 2.5);
-      spawnFood();
-      updateHud();
-    } else {
-      snake.pop();
-    }
-  }
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('restartBtn').addEventListener('click', startGame);
+            document.getElementById('resumeBtn').addEventListener('click', togglePause);
 
-  function endGame() {
-    state = 'gameover';
-    if (score > highScore) {
-      highScore = score;
-      localStorage.setItem(HIGH_KEY, String(highScore));
-      highScoreEl.textContent = String(highScore).padStart(3, '0');
-    }
-    finalScoreText.textContent = `Score: ${score}   ·   Best: ${highScore}`;
-    overOverlay.classList.remove('hidden');
-  }
+            function step() {
+                dir = nextDir;
+                const head = snake[0];
+                const newHead = { x: head.x + dir.x, y: head.y + dir.y };
 
-  function draw(time) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const hitWall = newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS;
+                const hitSelf = snake.some(s => s.x === newHead.x && s.y === newHead.y);
 
-    // subtle grid
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < COLS; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * cellSize, 0);
-      ctx.lineTo(i * cellSize, canvas.height);
-      ctx.stroke();
-    }
-    for (let j = 1; j < ROWS; j++) {
-      ctx.beginPath();
-      ctx.moveTo(0, j * cellSize);
-      ctx.lineTo(canvas.width, j * cellSize);
-      ctx.stroke();
-    }
+                if (hitWall || hitSelf) {
+                    endGame();
+                    return;
+                }
 
-    // food (pulsing amber glow)
-    foodPulse += 0.12;
-    const pulse = (Math.sin(foodPulse) + 1) / 2; // 0..1
-    const fx = food.x * cellSize + cellSize / 2;
-    const fy = food.y * cellSize + cellSize / 2;
-    const radius = cellSize * (0.28 + pulse * 0.10);
-    const grad = ctx.createRadialGradient(fx, fy, 0, fx, fy, radius * 2.2);
-    grad.addColorStop(0, 'rgba(255,182,39,0.95)');
-    grad.addColorStop(0.5, 'rgba(255,182,39,0.35)');
-    grad.addColorStop(1, 'rgba(255,182,39,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(fx, fy, radius * 2.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ffd98a';
-    ctx.beginPath();
-    ctx.arc(fx, fy, radius, 0, Math.PI * 2);
-    ctx.fill();
+                snake.unshift(newHead);
 
-    // snake
-    const n = snake.length;
-    snake.forEach((seg, i) => {
-      const t = i / Math.max(1, n - 1);
-      const r = Math.round(61 + (20 - 61) * t);
-      const g = Math.round(255 + (96 - 255) * t);
-      const b = Math.round(122 + (47 - 122) * t);
-      const x = seg.x * cellSize;
-      const y = seg.y * cellSize;
-      const pad = cellSize * 0.08;
+                if (newHead.x === food.x && newHead.y === food.y) {
+                    score += 10;
+                    if (score % 50 === 0) { level++; }
+                    tickMs = Math.max(70, tickMs - 2.5);
+                    spawnFood();
+                    updateHud();
+                    playEat();
+                } else {
+                    snake.pop();
+                }
+            }
 
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
-      if (i === 0) {
-        ctx.shadowColor = 'rgba(61,255,122,0.9)';
-        ctx.shadowBlur = cellSize * 0.6;
-      } else {
-        ctx.shadowBlur = 0;
-      }
-      roundRect(ctx, x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2, cellSize * 0.22);
-      ctx.fill();
-      ctx.shadowBlur = 0;
+            function endGame() {
+                state = 'gameover';
+                playGameOver();
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem(HIGH_KEY, String(highScore));
+                    highScoreEl.textContent = String(highScore).padStart(3, '0');
+                }
+                finalScoreText.textContent = `Score: ${score}   ·   Best: ${highScore}`;
+                overOverlay.classList.remove('hidden');
+            }
 
-      if (i === 0) {
-        // eyes
-        ctx.fillStyle = '#07150f';
-        const eyeOffset = cellSize * 0.2;
-        const eyeR = cellSize * 0.07;
-        let ex1, ey1, ex2, ey2;
-        const cxp = x + cellSize / 2, cyp = y + cellSize / 2;
-        if (dir.x === 1) { ex1=cxp+eyeOffset; ey1=cyp-eyeOffset; ex2=cxp+eyeOffset; ey2=cyp+eyeOffset; }
-        else if (dir.x === -1) { ex1=cxp-eyeOffset; ey1=cyp-eyeOffset; ex2=cxp-eyeOffset; ey2=cyp+eyeOffset; }
-        else if (dir.y === 1) { ex1=cxp-eyeOffset; ey1=cyp+eyeOffset; ex2=cxp+eyeOffset; ey2=cyp+eyeOffset; }
-        else { ex1=cxp-eyeOffset; ey1=cyp-eyeOffset; ex2=cxp+eyeOffset; ey2=cyp-eyeOffset; }
-        ctx.beginPath(); ctx.arc(ex1, ey1, eyeR, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(ex2, ey2, eyeR, 0, Math.PI*2); ctx.fill();
-      }
-    });
-  }
+            function draw(time) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
+                // subtle grid
+                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                ctx.lineWidth = 1;
+                for (let i = 1; i < COLS; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * cellSize, 0);
+                    ctx.lineTo(i * cellSize, canvas.height);
+                    ctx.stroke();
+                }
+                for (let j = 1; j < ROWS; j++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, j * cellSize);
+                    ctx.lineTo(canvas.width, j * cellSize);
+                    ctx.stroke();
+                }
 
-  function loop(time) {
-    if (state !== 'playing') return;
-    const dt = time - lastTime;
-    lastTime = time;
-    acc += dt;
+                // food (pulsing amber glow)
+                foodPulse += 0.12;
+                const pulse = (Math.sin(foodPulse) + 1) / 2; // 0..1
+                const fx = food.x * cellSize + cellSize / 2;
+                const fy = food.y * cellSize + cellSize / 2;
+                const radius = cellSize * (0.28 + pulse * 0.10);
+                const grad = ctx.createRadialGradient(fx, fy, 0, fx, fy, radius * 2.2);
+                grad.addColorStop(0, 'rgba(255,182,39,0.95)');
+                grad.addColorStop(0.5, 'rgba(255,182,39,0.35)');
+                grad.addColorStop(1, 'rgba(255,182,39,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(fx, fy, radius * 2.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffd98a';
+                ctx.beginPath();
+                ctx.arc(fx, fy, radius, 0, Math.PI * 2);
+                ctx.fill();
 
-    while (acc >= tickMs) {
-      step();
-      acc -= tickMs;
-      if (state !== 'playing') break;
-    }
+                // snake
+                const n = snake.length;
+                snake.forEach((seg, i) => {
+                    const t = i / Math.max(1, n - 1);
+                    const r = Math.round(61 + (20 - 61) * t);
+                    const g = Math.round(255 + (96 - 255) * t);
+                    const b = Math.round(122 + (47 - 122) * t);
+                    const x = seg.x * cellSize;
+                    const y = seg.y * cellSize;
+                    const pad = cellSize * 0.08;
 
-    draw(time);
-    if (state === 'playing') requestAnimationFrame(loop);
-  }
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    if (i === 0) {
+                        ctx.shadowColor = 'rgba(61,255,122,0.9)';
+                        ctx.shadowBlur = cellSize * 0.6;
+                    } else {
+                        ctx.shadowBlur = 0;
+                    }
+                    roundRect(ctx, x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2, cellSize * 0.22);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
 
-  resizeCanvas();
-  state = 'idle';
-  reset();
-  draw(0);
-})();</script>
+                    if (i === 0) {
+                        // eyes
+                        ctx.fillStyle = '#07150f';
+                        const eyeOffset = cellSize * 0.2;
+                        const eyeR = cellSize * 0.07;
+                        let ex1, ey1, ex2, ey2;
+                        const cxp = x + cellSize / 2, cyp = y + cellSize / 2;
+                        if (dir.x === 1) { ex1 = cxp + eyeOffset; ey1 = cyp - eyeOffset; ex2 = cxp + eyeOffset; ey2 = cyp + eyeOffset; }
+                        else if (dir.x === -1) { ex1 = cxp - eyeOffset; ey1 = cyp - eyeOffset; ex2 = cxp - eyeOffset; ey2 = cyp + eyeOffset; }
+                        else if (dir.y === 1) { ex1 = cxp - eyeOffset; ey1 = cyp + eyeOffset; ex2 = cxp + eyeOffset; ey2 = cyp + eyeOffset; }
+                        else { ex1 = cxp - eyeOffset; ey1 = cyp - eyeOffset; ex2 = cxp + eyeOffset; ey2 = cyp - eyeOffset; }
+                        ctx.beginPath(); ctx.arc(ex1, ey1, eyeR, 0, Math.PI * 2); ctx.fill();
+                        ctx.beginPath(); ctx.arc(ex2, ey2, eyeR, 0, Math.PI * 2); ctx.fill();
+                    }
+                });
+            }
+
+            function roundRect(ctx, x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + w, y, x + w, y + h, r);
+                ctx.arcTo(x + w, y + h, x, y + h, r);
+                ctx.arcTo(x, y + h, x, y, r);
+                ctx.arcTo(x, y, x + w, y, r);
+                ctx.closePath();
+            }
+
+            function loop(time) {
+                if (state !== 'playing') return;
+                const dt = time - lastTime;
+                lastTime = time;
+                acc += dt;
+
+                while (acc >= tickMs) {
+                    step();
+                    acc -= tickMs;
+                    if (state !== 'playing') break;
+                }
+
+                draw(time);
+                if (state === 'playing') requestAnimationFrame(loop);
+            }
+
+            resizeCanvas();
+            state = 'idle';
+            reset();
+            draw(0);
+        })();
+    </script>
 </body>
 </html>
