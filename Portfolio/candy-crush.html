@@ -526,15 +526,18 @@
   }
 
   @media (max-width: 480px){
-    .app{ padding: max(6px, var(--safe-t)) 6px max(6px, var(--safe-b)); }
+    .app{ padding: max(6px, var(--safe-t)) 0 max(6px, var(--safe-b)) 0; }
+    .title{ padding: 0 10px; }
+    .hud{ padding: 0 8px; }
     .title h1{ font-size: 1.6rem; }
     .title p{ font-size: 0.78rem; }
     .stat{ padding: 8px 4px; }
     .stat .label{ font-size: 0.58rem; }
     .stat .value{ font-size: 1.1rem; }
-    .board-shell{ padding: 5px; border-radius: 16px; }
+    .board-shell{ margin: 0 4px; padding: 4px; border-radius: 16px; }
     #board{ gap: 3px; }
     .tile{ border-radius: 8px; }
+    .candy .emoji{ font-size: clamp(1.25rem, 7vw, 2rem); }
     .level-node{ width:56px; height:56px; font-size:1rem; }
   }
 </style>
@@ -674,36 +677,6 @@
     if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   }
-  let voicesCache = [];
-  function loadVoices(){
-    if('speechSynthesis' in window){
-      voicesCache = window.speechSynthesis.getVoices();
-    }
-  }
-  if('speechSynthesis' in window){
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-  }
-  function pickFunVoice(){
-    if(!voicesCache.length) return null;
-    const preferred = voicesCache.find(v => /female|samantha|victoria|zira|karen|moira|tessa|serena|allison/i.test(v.name));
-    return preferred || voicesCache.find(v => v.lang && v.lang.startsWith('en')) || voicesCache[0];
-  }
-  function speak(text, {pitch=1.35, rate=1.05, volume=1} = {}){
-    if(muted) return;
-    if(!('speechSynthesis' in window)) return;
-    try{
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      const v = pickFunVoice();
-      if(v) utter.voice = v;
-      utter.pitch = pitch;
-      utter.rate = rate;
-      utter.volume = volume;
-      window.speechSynthesis.speak(utter);
-    }catch(e){ /* speech synthesis unavailable in this browser */ }
-  }
-
   function tone(freq, startOffset, duration, {type='sine', gain=0.2, glideTo=null} = {}){
     if(muted) return;
     const ctx = ensureAudio();
@@ -755,13 +728,22 @@
       if(comboLevel>=3) tone(base*2.2,0.05,0.1,{type:'sine',gain:0.07});
     },
     comboCallout(comboLevel){
-      // bright ascending sparkle run that gets bigger with the combo
-      const steps = Math.min(3 + comboLevel, 9);
+      // punchy bell-run that gets brighter and busier with the combo, plus a little "ding" bloom
+      const lvl = Math.min(comboLevel, 6);
+      const scale = [523.25, 659.25, 783.99, 987.77, 1174.66, 1318.51, 1567.98];
+      const steps = Math.min(2 + lvl, 7);
       for(let i=0;i<steps;i++){
-        const f = 720 + i*130 + comboLevel*35;
-        tone(f, i*0.04, 0.15, {type:'triangle', gain:0.13});
-        tone(f*2, i*0.04+0.01, 0.08, {type:'sine', gain:0.04});
+        const f = scale[Math.min(i, scale.length-1)] * (1 + lvl*0.03);
+        tone(f, i*0.055, 0.22, {type:'sine', gain:0.17, glideTo:f*1.15});
+        tone(f*2, i*0.055+0.015, 0.1, {type:'triangle', gain:0.06});
       }
+      tone(scale[Math.min(steps,scale.length-1)]*2, steps*0.055+0.05, 0.3, {type:'sine', gain:0.14, glideTo:scale[Math.min(steps,scale.length-1)]*3});
+    },
+    victory(big){
+      // bright celebratory flourish used alongside the level-complete splash
+      const notes = big ? [659.25,783.99,987.77,1174.66,1567.98] : [523.25,659.25,783.99,1046.50];
+      notes.forEach((f,i)=>tone(f,i*0.07,0.28,{type:'triangle',gain:0.18,glideTo:f*1.2}));
+      notes.forEach((f,i)=>tone(f*2,i*0.07+0.02,0.16,{type:'sine',gain:0.07}));
     },
     special(type){
       if(type === 'wrap'){
@@ -805,7 +787,6 @@
     save.muted = muted;
     persistSave();
     updateSoundIcons();
-    if(muted && 'speechSynthesis' in window){ window.speechSynthesis.cancel(); }
     if(!muted) SFX.swap();
   }
   soundBtn.addEventListener('click', toggleMute);
@@ -1181,7 +1162,6 @@
         if(combo < 2){
           const specialWord = firstType === 'bomb' ? 'Color Bomb!' : (firstType === 'wrap' ? 'Wrapped!' : 'Striped!');
           showComboSplash(specialWord);
-          speak(specialWord, {pitch:1.25, rate:1.05});
         }
       } else {
         SFX.pop(combo);
@@ -1191,7 +1171,6 @@
         const comboWord = COMBO_WORDS[Math.min(combo,6)];
         SFX.comboCallout(combo);
         showComboSplash(comboWord, 950);
-        speak(comboWord, {pitch: 1.3 + Math.min(combo,6)*0.05, rate: 1.1});
       }
 
       score += clearSet.size * 10 * combo + specials.size * 40;
@@ -1430,7 +1409,7 @@
       SFX.win();
       const victoryWord = earnedStars >= 3 ? 'Sugar Rush!' : (earnedStars === 2 ? 'Delicious!' : 'Sweet!');
       showComboSplash(victoryWord, 1100);
-      speak(victoryWord + (earnedStars >= 3 ? ' Incredible!' : ' Level complete!'), {pitch:1.4, rate:1.0});
+      setTimeout(() => SFX.victory(earnedStars >= 3), 150);
       launchConfetti(earnedStars >= 3);
       setTimeout(() => launchConfetti(false), 300);
       setTimeout(() => launchConfetti(earnedStars >= 3), 650);
