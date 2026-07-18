@@ -59,9 +59,7 @@
     margin: 0 0 14px 0;
     color:#fff;
   }
-  .sound-toggle, .back-btn{
-    position:absolute;
-    top: -2px;
+  .icon-circle{
     width:40px;
     height:40px;
     border-radius:50%;
@@ -76,10 +74,19 @@
     -webkit-user-select:none;
     user-select:none;
     -webkit-touch-callout:none;
+    transition: transform 0.12s ease;
   }
-  .sound-toggle{ right: 4px; }
-  .back-btn{ left: 4px; font-size:1.3rem; }
-  .sound-toggle.muted{ opacity:0.55; }
+  .icon-circle:active{ transform: scale(0.88); }
+  .icon-circle.muted{ opacity:0.55; }
+  .sound-toggle{ position:absolute; top:-2px; right:4px; }
+  .back-btn{ position:absolute; top:-2px; left:4px; font-size:1.3rem; }
+  .top-right-icons{
+    position:absolute;
+    top:-2px;
+    right:4px;
+    display:flex;
+    gap:8px;
+  }
   .title h1{
     margin:0;
     font-size: 2.1rem;
@@ -210,6 +217,14 @@
     border-radius: 22px;
     padding: 12px;
     box-shadow: 0 10px 0 rgba(0,0,0,0.18);
+  }
+  .board-shell.shake{ animation: shakeAnim 0.35s ease; }
+  @keyframes shakeAnim{
+    0%,100%{ transform: translate(0,0); }
+    20%{ transform: translate(-6px,2px) rotate(-0.6deg); }
+    40%{ transform: translate(5px,-3px) rotate(0.6deg); }
+    60%{ transform: translate(-4px,3px) rotate(-0.4deg); }
+    80%{ transform: translate(3px,-2px) rotate(0.4deg); }
   }
 
   .toast{
@@ -448,7 +463,26 @@
     letter-spacing: 4px;
   }
   .modal .big-stars .off{ color: #e4dcf2; }
-  .modal .big-stars .on{ color: var(--gold); text-shadow: 0 2px 2px rgba(0,0,0,0.2); }
+  .modal .big-stars .on{
+    color: var(--gold);
+    text-shadow: 0 2px 2px rgba(0,0,0,0.2);
+    display:inline-block;
+    animation: starPop 0.5s cubic-bezier(.34,1.6,.64,1) both;
+  }
+  .modal .big-stars .on:nth-child(1){ animation-delay: 0.1s; }
+  .modal .big-stars .on:nth-child(2){ animation-delay: 0.25s; }
+  .modal .big-stars .on:nth-child(3){ animation-delay: 0.4s; }
+  @keyframes starPop{
+    0%{ transform: scale(0) rotate(-40deg); opacity:0; }
+    70%{ transform: scale(1.3) rotate(8deg); opacity:1; }
+    100%{ transform: scale(1) rotate(0); opacity:1; }
+  }
+  .modal.celebrate{ animation: modalBounce 0.5s cubic-bezier(.34,1.5,.64,1) both; }
+  @keyframes modalBounce{
+    0%{ transform: scale(0.4) translateY(40px); opacity:0; }
+    60%{ transform: scale(1.06) translateY(-6px); opacity:1; }
+    100%{ transform: scale(1) translateY(0); opacity:1; }
+  }
   .modal .modal-buttons{ display:flex; gap:10px; }
 
   footer{
@@ -479,7 +513,7 @@
     <!-- ================= LEVEL MAP SCREEN ================= -->
     <div id="mapScreen" class="screen">
       <div class="title">
-        <button id="mapSoundBtn" class="sound-toggle" aria-label="Toggle sound" title="Toggle sound">🔊</button>
+        <button id="mapSoundBtn" class="icon-circle sound-toggle" aria-label="Toggle sound" title="Toggle sound">🔊</button>
         <h1>Sugar <span>Rush</span></h1>
         <p>Tap a level to play. Offline saga, saved on this device.</p>
       </div>
@@ -491,9 +525,12 @@
     <!-- ================= GAME SCREEN ================= -->
     <div id="gameScreen" class="screen hidden">
       <div class="title">
-        <button id="backBtn" class="back-btn" aria-label="Back to map" title="Back to map">←</button>
+        <button id="backBtn" class="icon-circle back-btn" aria-label="Back to map" title="Back to map">←</button>
         <h1 id="levelTitle">Level <span id="levelNum">1</span></h1>
-        <button id="soundBtn" class="sound-toggle" aria-label="Toggle sound" title="Toggle sound">🔊</button>
+        <div class="top-right-icons">
+          <button id="restartBtn" class="icon-circle" aria-label="Restart level" title="Restart level">↻</button>
+          <button id="soundBtn" class="icon-circle" aria-label="Toggle sound" title="Toggle sound">🔊</button>
+        </div>
       </div>
 
       <div class="hud">
@@ -515,20 +552,15 @@
         <div id="board"></div>
         <div id="toast" class="toast"></div>
       </div>
-
-      <div class="controls">
-        <button class="action secondary" id="hintBtn">Hint</button>
-        <button class="action" id="restartBtn">Restart</button>
-      </div>
-
-      <footer>Match 4 for a striped candy, an L/T shape for a wrapped candy, and 5 in a row for a color bomb.</footer>
     </div>
 
   </div>
 </div>
 
+<canvas id="confettiCanvas" style="position:fixed;inset:0;pointer-events:none;z-index:20;"></canvas>
+
 <div class="overlay" id="overlay">
-  <div class="modal">
+  <div class="modal" id="modalCard">
     <h2 id="modalTitle">Level Complete!</h2>
     <div class="big-stars" id="modalStars"></div>
     <p id="modalText">Sweet! You hit the score goal.</p>
@@ -562,7 +594,6 @@
   const modalStars = document.getElementById('modalStars');
   const modalBtn = document.getElementById('modalBtn');
   const modalMapBtn = document.getElementById('modalMapBtn');
-  const hintBtn = document.getElementById('hintBtn');
   const restartBtn = document.getElementById('restartBtn');
   const soundBtn = document.getElementById('soundBtn');
   const mapSoundBtn = document.getElementById('mapSoundBtn');
@@ -647,27 +678,56 @@
     src.start(t0);
     src.stop(t0 + duration);
   }
+  const COMBO_WORDS = { 2:'Sweet!', 3:'Tasty!', 4:'Delicious!', 5:'Divine!', 6:'Sugar Rush!' };
   const SFX = {
-    ready(){ [523.25,659.25,783.99,1046.50].forEach((f,i)=>tone(f,i*0.09,0.22,{type:'triangle',gain:0.16})); },
+    ready(){ [523.25,659.25,783.99,1046.50].forEach((f,i)=>tone(f,i*0.08,0.22,{type:'triangle',gain:0.16})); },
     swap(){ tone(420,0,0.09,{type:'sine',gain:0.12,glideTo:520}); },
     invalid(){ noiseBuzz(0,0.14,500); tone(160,0,0.14,{type:'square',gain:0.06}); },
     pop(comboLevel){
-      const base = 660 + Math.min(comboLevel,6)*90;
-      tone(base,0,0.16,{type:'triangle',gain:0.18,glideTo:base*1.6});
-      tone(base*1.5,0.02,0.12,{type:'sine',gain:0.09});
+      const wobble = Math.random()*24 - 12;
+      const base = 660 + Math.min(comboLevel,8)*85 + wobble;
+      tone(base,0,0.15,{type:'triangle',gain:0.18,glideTo:base*1.7});
+      tone(base*1.5,0.02,0.12,{type:'sine',gain:0.1});
+      if(comboLevel>=3) tone(base*2.2,0.05,0.1,{type:'sine',gain:0.07});
     },
-    special(){ tone(880,0,0.18,{type:'sawtooth',gain:0.14,glideTo:1600}); tone(440,0.03,0.2,{type:'triangle',gain:0.1}); },
+    comboCallout(comboLevel){
+      // bright ascending sparkle run that gets bigger with the combo
+      const steps = Math.min(3 + comboLevel, 9);
+      for(let i=0;i<steps;i++){
+        const f = 720 + i*130 + comboLevel*35;
+        tone(f, i*0.04, 0.15, {type:'triangle', gain:0.13});
+        tone(f*2, i*0.04+0.01, 0.08, {type:'sine', gain:0.04});
+      }
+    },
+    special(type){
+      if(type === 'wrap'){
+        [880,1108.73,1318.51,1760].forEach((f,i)=>tone(f,i*0.05,0.22,{type:'sine',gain:0.14}));
+      } else if(type === 'bomb'){
+        tone(160,0,0.32,{type:'sawtooth',gain:0.16,glideTo:70});
+        tone(1400,0.05,0.28,{type:'square',gain:0.08,glideTo:2600});
+      } else {
+        tone(880,0,0.18,{type:'sawtooth',gain:0.15,glideTo:1700});
+        tone(440,0.03,0.2,{type:'triangle',gain:0.1});
+      }
+    },
     bomb(){
-      noiseBuzz(0,0.3,2200);
-      [220,330,440,660,880].forEach((f,i)=>tone(f,i*0.02,0.3,{type:'sawtooth',gain:0.09}));
+      noiseBuzz(0,0.34,2400);
+      [110,220,330,440,660,880,1100].forEach((f,i)=>tone(f,i*0.018,0.32,{type:'sawtooth',gain:0.08}));
     },
     win(){
-      const notes = [523.25,659.25,783.99,1046.50,1318.51];
-      notes.forEach((f,i)=>tone(f,i*0.11,0.30,{type:'triangle',gain:0.18}));
-      notes.forEach((f,i)=>tone(f*2,i*0.11+0.02,0.18,{type:'sine',gain:0.05}));
+      // big layered fanfare: melody + high sparkle harmonics + a low echoey tail + bass swell
+      const notes = [523.25,659.25,783.99,1046.50,1318.51,1567.98];
+      notes.forEach((f,i)=>tone(f,i*0.09,0.34,{type:'triangle',gain:0.19}));
+      notes.forEach((f,i)=>tone(f*2,i*0.09+0.03,0.22,{type:'sine',gain:0.08}));
+      notes.forEach((f,i)=>tone(f*0.5,i*0.09+0.45,0.4,{type:'sine',gain:0.06}));
+      tone(130.81,0,0.55,{type:'sawtooth',gain:0.11,glideTo:261.63});
+      for(let i=0;i<10;i++){
+        tone(1600 + Math.random()*1200, 0.5 + i*0.07, 0.18, {type:'sine', gain:0.05});
+      }
     },
     lose(){ [440,349.23,293.66].forEach((f,i)=>tone(f,i*0.16,0.28,{type:'sawtooth',gain:0.1})); },
-    shuffle(){ tone(300,0,0.28,{type:'sine',gain:0.12,glideTo:900}); tone(450,0.05,0.22,{type:'triangle',gain:0.08,glideTo:1200}); }
+    shuffle(){ tone(300,0,0.28,{type:'sine',gain:0.12,glideTo:900}); tone(450,0.05,0.22,{type:'triangle',gain:0.08,glideTo:1200}); },
+    hint(){ tone(1046.5,0,0.12,{type:'sine',gain:0.07}); }
   };
   function updateSoundIcons(){
     [soundBtn, mapSoundBtn].forEach(btn=>{
@@ -862,6 +922,7 @@
   function onTileClick(e){
     if(busy) return;
     if(e.__fromSwipe) return;
+    bumpIdle();
     const r = parseInt(e.currentTarget.dataset.r);
     const c = parseInt(e.currentTarget.dataset.c);
 
@@ -893,6 +954,7 @@
     if(busy) return;
     const t = e.target.closest('.tile');
     if(!t) return;
+    bumpIdle();
     const touch = e.changedTouches[0];
     touchStart = { r: parseInt(t.dataset.r), c: parseInt(t.dataset.c), x: touch.clientX, y: touch.clientY };
   }, {passive:true});
@@ -949,6 +1011,7 @@
       await resolveBombSwap(aIdx, bIdx, cellA, cellB);
       await autoReshuffleIfStuck();
       busy = false;
+      bumpIdle();
       checkEndOfMoves();
       return;
     }
@@ -961,6 +1024,7 @@
       swapCells(a,b);
       render();
       busy = false;
+      bumpIdle();
       return;
     }
     SFX.swap();
@@ -970,6 +1034,7 @@
     await resolveMatches([aIdx,bIdx]);
     await autoReshuffleIfStuck();
     busy = false;
+    bumpIdle();
     checkEndOfMoves();
   }
 
@@ -1000,6 +1065,7 @@
       }
     }
     SFX.bomb();
+    shakeBoard();
     clearSet.forEach(i=>{ const el = boardEl.children[i]; if(el) el.classList.add('popping'); });
     score += clearSet.size * 12 + comboBonus;
     updateHud();
@@ -1044,8 +1110,17 @@
       }
 
       clearSet.forEach(i => { const el = boardEl.children[i]; if(el) el.classList.add('popping'); });
-      if(specials.size) SFX.special(); else SFX.pop(combo);
-      if(hadSpecialActivation) SFX.bomb();
+      if(specials.size){
+        const firstType = specials.values().next().value;
+        SFX.special(firstType);
+      } else {
+        SFX.pop(combo);
+      }
+      if(hadSpecialActivation){ SFX.bomb(); shakeBoard(); }
+      if(combo >= 2 && COMBO_WORDS[Math.min(combo,6)]){
+        SFX.comboCallout(combo);
+        showToast(COMBO_WORDS[Math.min(combo,6)], 900);
+      }
 
       score += clearSet.size * 10 * combo + specials.size * 40;
       updateHud();
@@ -1133,6 +1208,80 @@
     return null;
   }
 
+  const boardShellEl = document.querySelector('.board-shell');
+  let shakeTimer = null;
+  function shakeBoard(){
+    if(!boardShellEl) return;
+    boardShellEl.classList.remove('shake');
+    void boardShellEl.offsetWidth; // restart animation
+    boardShellEl.classList.add('shake');
+    clearTimeout(shakeTimer);
+    shakeTimer = setTimeout(() => boardShellEl.classList.remove('shake'), 400);
+  }
+
+  // ---------------- Confetti celebration ----------------
+  const confettiCanvas = document.getElementById('confettiCanvas');
+  const confettiCtx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+  const CONFETTI_COLORS = ['#ff5f7a','#ff9a3c','#ffd93c','#5fd15a','#4fa3ff','#a855e8','#ffc93c'];
+  let confettiParticles = [];
+  let confettiRAF = null;
+
+  function resizeConfettiCanvas(){
+    if(!confettiCanvas) return;
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeConfettiCanvas);
+  resizeConfettiCanvas();
+
+  function launchConfetti(big){
+    if(!confettiCtx) return;
+    resizeConfettiCanvas();
+    const count = big ? 140 : 80;
+    const w = confettiCanvas.width;
+    for(let i=0;i<count;i++){
+      confettiParticles.push({
+        x: Math.random()*w,
+        y: -20 - Math.random()*200,
+        vx: (Math.random()-0.5)*3,
+        vy: 2 + Math.random()*3.5,
+        size: 6 + Math.random()*7,
+        color: CONFETTI_COLORS[Math.floor(Math.random()*CONFETTI_COLORS.length)],
+        rot: Math.random()*Math.PI*2,
+        vrot: (Math.random()-0.5)*0.3,
+        life: 0,
+        maxLife: 180 + Math.random()*80
+      });
+    }
+    if(!confettiRAF) confettiRAF = requestAnimationFrame(tickConfetti);
+  }
+
+  function tickConfetti(){
+    if(!confettiCtx){ confettiRAF = null; return; }
+    confettiCtx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    confettiParticles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.03;
+      p.rot += p.vrot;
+      p.life++;
+      confettiCtx.save();
+      confettiCtx.translate(p.x, p.y);
+      confettiCtx.rotate(p.rot);
+      confettiCtx.globalAlpha = Math.max(0, 1 - p.life / p.maxLife);
+      confettiCtx.fillStyle = p.color;
+      confettiCtx.fillRect(-p.size/2, -p.size/3, p.size, p.size*0.6);
+      confettiCtx.restore();
+    });
+    confettiParticles = confettiParticles.filter(p => p.life < p.maxLife && p.y < confettiCanvas.height + 40);
+    if(confettiParticles.length > 0){
+      confettiRAF = requestAnimationFrame(tickConfetti);
+    } else {
+      confettiRAF = null;
+      confettiCtx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    }
+  }
+
   let toastTimer = null;
   function showToast(msg, duration = 1600){
     toastEl.textContent = msg;
@@ -1141,17 +1290,34 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
   }
 
-  hintBtn.addEventListener('click', async () => {
-    if(busy) return;
+  // ---------------- Auto-hint on idle (no button needed) ----------------
+  const IDLE_DELAY = 5000;
+  let idleTimer = null;
+  function clearIdleHint(){
+    if(idleTimer){ clearTimeout(idleTimer); idleTimer = null; }
+  }
+  function bumpIdle(){
+    clearIdleHint();
+    if(gameScreen.classList.contains('hidden')) return;
+    idleTimer = setTimeout(triggerAutoHint, IDLE_DELAY);
+  }
+  async function triggerAutoHint(){
+    if(busy || gameScreen.classList.contains('hidden')) return;
     const h = findHint();
-    if(!h){ await autoReshuffleIfStuck(true); return; }
+    if(!h){
+      await autoReshuffleIfStuck();
+      bumpIdle();
+      return;
+    }
+    SFX.hint();
     h.forEach(({r,c}) => {
       const el = getTileEl(r,c);
       if(!el) return;
       el.classList.add('hint');
-      setTimeout(() => el.classList.remove('hint'), 1200);
+      setTimeout(() => el.classList.remove('hint'), 1300);
     });
-  });
+    bumpIdle(); // keep gently nudging every few seconds while still idle
+  }
 
   async function autoReshuffleIfStuck(){
     if(hasAnyMove(grid)) return false;
@@ -1174,12 +1340,17 @@
   function endGame(won){
     busy = true;
     const earnedStars = won ? starsForScore(currentLevel, score) : 0;
+    const modalCard = document.getElementById('modalCard');
+    modalCard.classList.remove('celebrate');
     if(won){
       SFX.win();
+      launchConfetti(earnedStars >= 3);
+      setTimeout(() => launchConfetti(false), 350);
       modalTitle.textContent = 'Level Complete!';
       modalText.textContent = `Sweet! You scored ${score} (goal was ${goal}).`;
       modalBtn.textContent = 'Next Level';
       modalBtn.style.display = '';
+      modalCard.classList.add('celebrate');
       const prevStars = save.stars[currentLevel] || 0;
       save.stars[currentLevel] = Math.max(prevStars, earnedStars);
       save.bestScore[currentLevel] = Math.max(save.bestScore[currentLevel] || 0, score);
@@ -1212,6 +1383,7 @@
   backBtn.addEventListener('click', () => { showMap(); });
 
   function startLevel(n){
+    clearIdleHint();
     currentLevel = n;
     const cfg = levelConfig(n);
     goal = cfg.goal;
@@ -1225,10 +1397,12 @@
     busy = false;
     SFX.ready();
     autoReshuffleIfStuck();
+    bumpIdle();
   }
 
   // ---------------- Level map ----------------
   function showMap(){
+    clearIdleHint();
     gameScreen.classList.add('hidden');
     mapScreen.classList.remove('hidden');
     renderMap();
