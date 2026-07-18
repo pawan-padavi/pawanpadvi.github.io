@@ -213,7 +213,8 @@
     touch-action:manipulation;
   }
   .token.hopping{animation:hop .19s cubic-bezier(.34,1.56,.64,1);}
-  .token.capture-pop{animation:capturePop .32s ease-out;}
+  .token.capture-pop{animation:capturePop .34s ease-out;}
+  .token.captured-flash{animation:flashHit .36s ease-in-out;position:relative;z-index:9;}
   @keyframes hop{
     0%{transform:scale(1) translateY(0);}
     35%{transform:scale(.82,1.16) translateY(-38%);}
@@ -224,6 +225,13 @@
     0%{transform:scale(0.2) rotate(-30deg);opacity:.3;}
     55%{transform:scale(1.25) rotate(8deg);opacity:1;}
     100%{transform:scale(1) rotate(0);}
+  }
+  @keyframes flashHit{
+    0%{transform:scale(1);filter:brightness(1);}
+    20%{transform:scale(1.35);filter:brightness(2) saturate(0);}
+    45%{transform:scale(.85);filter:brightness(1.6);}
+    70%{transform:scale(1.15);filter:brightness(2) saturate(0);}
+    100%{transform:scale(.3);filter:brightness(1);opacity:.2;}
   }
   .stack[data-count="1"] .token{width:72%;height:72%;}
   .stack[data-count="2"] .token{width:46%;height:46%;}
@@ -336,6 +344,7 @@
       <h1>Lu<span>d</span>o</h1>
     </div>
     <button class="new-game-btn" id="newGameTop" style="display:none;">↺ New game</button>
+    <button class="new-game-btn" id="soundToggle" style="display:none;" title="Toggle sound">🔊 Sound</button>
   </div>
 
   <!-- SETUP SCREEN -->
@@ -358,7 +367,7 @@
       <div class="board" id="board"></div>
     </div>
     <div class="side">
-
+      
       <div class="panel dice-panel">
         <div class="dice-turn-label" id="turnLabel">—</div>
         <div class="dice" id="dice">
@@ -369,9 +378,9 @@
         <button class="roll-btn" id="rollBtn">Roll Dice</button>
         <div class="hint" id="hint">Roll a 6 to bring a token out of the yard.</div>
       </div>
-      <div class="panel">
+       <div class="panel">
         <div class="players" id="players"></div>
-      </div>
+       </div>
       <div class="panel log-panel">
         <h3>GAME LOG</h3>
         <div class="log" id="log"></div>
@@ -431,6 +440,49 @@
     if (pos <= 56) return HOME_ENTRY[color][pos - 51];
     return CENTER;
   }
+
+  /* ============ SOUND ============ */
+  let audioCtx = null;
+  let soundOn = true;
+
+  function ensureAudio(){
+    if (!soundOn) return null;
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    } catch (e){
+      return null;
+    }
+  }
+
+  function beep(freq, duration, type, vol, delay){
+    const ctx = ensureAudio();
+    if (!ctx) return;
+    type = type || 'sine';
+    vol = vol == null ? 0.18 : vol;
+    delay = delay || 0;
+    const t0 = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(vol, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.03);
+  }
+
+  const sfx = {
+    diceTick(){ beep(520 + Math.random()*140, 0.045, 'square', 0.07); },
+    hop(){ beep(500, 0.08, 'sine', 0.14); },
+    yardOut(){ beep(392, 0.16, 'triangle', 0.18); },
+    capture(){ beep(700, 0.09, 'sawtooth', 0.17); beep(280, 0.18, 'sawtooth', 0.16, 0.09); },
+    home(){ beep(523.25, 0.1, 'sine', 0.18, 0); beep(659.25, 0.1, 'sine', 0.18, 0.1); beep(784, 0.18, 'sine', 0.18, 0.2); },
+    win(){ [523.25,659.25,784,1046.5].forEach((f,i)=>beep(f, 0.2, 'triangle', 0.2, i*0.15)); },
+    click(){ beep(440, 0.045, 'square', 0.07); }
+  };
 
   /* ============ STATE ============ */
   let state = null;
@@ -508,6 +560,8 @@
   });
 
   document.getElementById('startBtn').addEventListener('click', () => {
+    ensureAudio();
+    sfx.click();
     const inputs = [...nameGrid.querySelectorAll('input')];
     const toggles = [...nameGrid.querySelectorAll('.ai-toggle')];
     const names = inputs.map(i => i.value);
@@ -516,22 +570,30 @@
     document.getElementById('setup').style.display = 'none';
     document.getElementById('game').classList.add('active');
     document.getElementById('newGameTop').style.display = 'inline-block';
+    document.getElementById('soundToggle').style.display = 'inline-block';
     buildBoardOnce();
     renderPlayers();
     renderTokens();
     updateTurnUI();
   });
 
-  document.getElementById('newGameTop').addEventListener('click', resetToSetup);
+  document.getElementById('newGameTop').addEventListener('click', () => { sfx.click(); resetToSetup(); });
   document.getElementById('playAgainBtn').addEventListener('click', () => {
+    sfx.click();
     document.getElementById('winOverlay').classList.remove('show');
     resetToSetup();
+  });
+  document.getElementById('soundToggle').addEventListener('click', (e) => {
+    soundOn = !soundOn;
+    e.currentTarget.textContent = soundOn ? '🔊 Sound' : '🔇 Muted';
+    if (soundOn){ ensureAudio(); sfx.click(); }
   });
 
   function resetToSetup(){
     document.getElementById('game').classList.remove('active');
     document.getElementById('setup').style.display = 'block';
     document.getElementById('newGameTop').style.display = 'none';
+    document.getElementById('soundToggle').style.display = 'none';
     document.getElementById('log').innerHTML = '';
   }
 
@@ -597,9 +659,10 @@
   /* ============ TOKEN RENDERING ============ */
   // hoppingRef: {playerIdx,tokenIdx} of a token currently taking one animated step
   // capturedRefs: array of {playerIdx,tokenIdx} that just got sent home and should pop in
-  function renderTokens(hoppingRef, capturedRefs){
+  function renderTokens(hoppingRef, capturedRefs, flashRefs){
     hoppingRef = hoppingRef || null;
     capturedRefs = capturedRefs || [];
+    flashRefs = flashRefs || [];
 
     // remove old stacks
     boardEl.querySelectorAll('.stack').forEach(s => s.remove());
@@ -637,6 +700,9 @@
         if (capturedRefs.some(r => r.playerIdx === item.playerIdx && r.tokenIdx === item.tokenIdx)){
           tok.classList.add('capture-pop');
         }
+        if (flashRefs.some(r => r.playerIdx === item.playerIdx && r.tokenIdx === item.tokenIdx)){
+          tok.classList.add('captured-flash');
+        }
         const isMovable = state.awaitingSelection &&
           item.playerIdx === state.currentPlayerIndex &&
           !state.players[state.currentPlayerIndex].isAI &&
@@ -666,6 +732,7 @@
     if (wasInYard){
       token.pos = 0;
       renderTokens(ref);
+      sfx.yardOut();
       await wait(260);
       return;
     }
@@ -674,6 +741,7 @@
     for (let step = 1; step <= dice; step++){
       token.pos = startPos + step;
       renderTokens(ref);
+      sfx.hop();
       await wait(190);
     }
   }
@@ -738,6 +806,7 @@
 
   function doRoll(){
     if (!state.canRoll || state.rolling || state.gameOver) return;
+    ensureAudio();
     state.rolling = true;
     rollBtn.disabled = true;
     diceEl.classList.add('rolling');
@@ -747,6 +816,7 @@
     const maxTicks = 10;
     const spin = setInterval(() => {
       setDiceFace(1 + Math.floor(Math.random() * 6));
+      sfx.diceTick();
       ticks++;
       if (ticks >= maxTicks){
         clearInterval(spin);
@@ -883,6 +953,7 @@
     // step-by-step hop across the board, one cell per pip on the dice
     await animateTokenMove(playerIdx, tokenIdx, dice, wasInYard);
 
+    // work out who gets captured, but don't move them yet — we want the hit to be visible first
     let captured = false;
     const capturedRefs = [];
     if (token.pos >= 0 && token.pos <= 50){
@@ -895,10 +966,8 @@
             if (ot.pos >= 0 && ot.pos <= 50){
               const ocoord = PATH[(START_INDEX[op.color] + ot.pos) % 52];
               if (ocoord.join(',') === key){
-                ot.pos = -1;
                 captured = true;
-                capturedRefs.push({playerIdx:opi, tokenIdx:oti});
-                log(`<b>${escapeHtml(player.name)}</b> sent <b>${escapeHtml(op.name)}</b>'s token back to the yard!`);
+                capturedRefs.push({playerIdx: opi, tokenIdx: oti});
               }
             }
           });
@@ -906,11 +975,29 @@
       }
     }
 
+    if (capturedRefs.length){
+      // flash the hit token in place at its old spot so the capture is clearly visible
+      renderTokens(null, [], capturedRefs);
+      sfx.capture();
+      await wait(340);
+      // now actually send it back to its yard, where it pops in
+      capturedRefs.forEach(r => {
+        const op = state.players[r.playerIdx];
+        op.tokens[r.tokenIdx].pos = -1;
+        log(`<b>${escapeHtml(player.name)}</b> sent <b>${escapeHtml(op.name)}</b>'s token back to the yard!`);
+      });
+      renderTokens(null, capturedRefs);
+      await wait(280);
+    }
+
     const reachedHome = token.pos === 57;
     if (wasInYard) log(`<b>${escapeHtml(player.name)}</b> brought a token onto the board.`);
-    if (reachedHome) log(`<b>${escapeHtml(player.name)}</b> got a token all the way home! 🏠`);
+    if (reachedHome){
+      log(`<b>${escapeHtml(player.name)}</b> got a token all the way home! 🏠`);
+      sfx.home();
+    }
 
-    renderTokens(null, capturedRefs);
+    renderTokens();
     renderPlayers();
     state.animating = false;
 
@@ -929,6 +1016,7 @@
 
   function showWin(player){
     state.gameOver = true;
+    sfx.win();
     document.getElementById('winTitle').textContent = `${player.name} wins! ${EMOJI[player.color]}`;
     document.getElementById('winOverlay').classList.add('show');
   }
