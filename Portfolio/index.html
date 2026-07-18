@@ -469,6 +469,63 @@
                 font-weight: 500;
             }
 
+        /* animated circular portrait */
+        .about-photo-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .about-photo {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .about-photo::before {
+                content: "";
+                position: absolute;
+                inset: -6px;
+                border-radius: 50%;
+                background: conic-gradient(from 0deg, var(--teal), var(--amber), var(--teal-dim), var(--teal));
+                animation: spin-ring 6s linear infinite;
+            }
+
+            .about-photo::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 50%;
+                background: var(--bg-alt);
+            }
+
+            .about-photo img {
+                position: relative;
+                z-index: 1;
+                width: calc(100% - 10px);
+                height: calc(100% - 10px);
+                border-radius: 50%;
+                object-fit: cover;
+                border: 3px solid var(--bg-alt);
+                box-shadow: 0 18px 40px -14px rgba(79,216,196,0.4);
+            }
+
+        @keyframes spin-ring {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+            .about-photo::before {
+                animation: none;
+            }
+        }
+
         .focus-list {
             list-style: none;
             margin: 0;
@@ -882,12 +939,19 @@
                         <p>I'm a software engineer specialized in the Microsoft stack. My career has centered on delivering <strong>mission-critical portals for the Government of Jharkhand</strong> and enterprise systems for multinationals across insurance and finance.</p>
                         <p>I'm currently pivoting toward <strong>AI engineering</strong> — applying the same rigor I bring to distributed .NET architecture to the integration of large language models like Claude into real enterprise workflows. Strong DSA fundamentals let me reason about where automation genuinely removes friction, rather than bolting AI on for its own sake.</p>
                     </div>
-                    <ul class="focus-list reveal">
-                        <li><span class="idx">01</span> .NET 10 / C# enterprise architecture</li>
-                        <li><span class="idx">02</span> Azure cloud &amp; security migration</li>
-                        <li><span class="idx">03</span> LLM / Claude AI integration</li>
-                        <li><span class="idx">04</span> High-concurrency data systems</li>
-                    </ul>
+                    <div class="reveal">
+                        <div class="about-photo-wrap">
+                            <div class="about-photo">
+                                <img src="https://www.pawanpadvi.com/IMG001.png" alt="Pawan Padvi" loading="lazy">
+                            </div>
+                        </div>
+                        <ul class="focus-list">
+                            <li><span class="idx">01</span> .NET 10 / C# enterprise architecture</li>
+                            <li><span class="idx">02</span> Azure cloud &amp; security migration</li>
+                            <li><span class="idx">03</span> LLM / Claude AI integration</li>
+                            <li><span class="idx">04</span> High-concurrency data systems</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </section>
