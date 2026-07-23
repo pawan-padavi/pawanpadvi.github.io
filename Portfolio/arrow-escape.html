@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arrow Escape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-0: #070a16;
+            --bg-1: #0d1226;
+            --panel: #11162c;
+            --panel-line: rgba(255,255,255,0.06);
+            --ink: #eef1ff;
+            --ink-dim: #8891b8;
+            --accent: #22c55e;
+            --accent-glow: rgba(34,197,94,0.55);
+            --orange: #ff8a3d;
+            --teal: #2dd4bf;
+            --blue: #3b82f6;
+            --violet: #8b5cf6;
+            --magenta: #ec4899;
+            --crimson: #f43f5e;
+            --gold: #f5c542;
+            --radius-lg: 22px;
+            --radius-md: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter',system-ui,sans-serif;
+            background: radial-gradient(circle at 15% 10%, rgba(139,92,246,0.16), transparent 40%), radial-gradient(circle at 85% 15%, rgba(45,212,191,0.14), transparent 42%), radial-gradient(circle at 50% 100%, rgba(34,197,94,0.10), transparent 50%), linear-gradient(180deg, var(--bg-0), var(--bg-1));
+            color: var(--ink);
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+            /* faint grid texture */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+                background-size: 34px 34px;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+        .wrap {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 560px;
+            padding: 22px 18px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: linear-gradient(160deg,#3ee07a,#189a4d);
+            box-shadow: 0 4px 0 #0d6b32, 0 8px 18px rgba(34,197,94,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .brand-badge svg {
+                width: 20px;
+                height: 20px;
+            }
+
+        h1 {
+            font-family: 'Baloo 2', sans-serif;
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: 0.2px;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .mute-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--panel);
+            border: 1px solid var(--panel-line);
+            color: var(--ink-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform .15s ease, color .15s ease;
+        }
+
+            .mute-btn:active {
+                transform: scale(0.92);
+            }
+
+            .mute-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
+        .stat-row {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--panel);
+            border: 1px solid var(--panel-line);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-label {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1.1px;
+            color: var(--ink-dim);
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-family: 'Baloo 2', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+            .stat-value.arrows {
+                color: var(--accent);
+            }
+
+        .board-shell {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+            border: 1px solid var(--panel-line);
+            border-radius: var(--radius-lg);
+            padding: 10px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 20px 50px rgba(0,0,0,0.45);
+        }
+
+        #board {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            background: repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px calc(100%/var(--gsize))), repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px calc(100%/var(--gsize))), #0a0e20;
+        }
+
+        .cell-glow {
+            position: absolute;
+            border-radius: 8px;
+            background: radial-gradient(circle, rgba(34,197,94,0.18), transparent 70%);
+            pointer-events: none;
+        }
+
+        .arrow {
+            position: absolute;
+            cursor: pointer;
+            touch-action: manipulation;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+            transition: filter .15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+            .arrow:hover {
+                filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)) brightness(1.06);
+            }
+
+            .arrow.blocked-shake {
+                animation: shake .32s ease;
+            }
+
+            .arrow.escaping {
+                transition: transform .38s cubic-bezier(.4,0,.2,1), opacity .38s ease;
+                opacity: 0;
+            }
+
+            .arrow.special svg .core {
+            }
+
+        @keyframes shake {
+            0%,100% {
+                transform: translate(0,0) rotate(0deg);
+            }
+
+            20% {
+                transform: translate(-3px,0) rotate(-2deg);
+            }
+
+            40% {
+                transform: translate(3px,0) rotate(2deg);
+            }
+
+            60% {
+                transform: translate(-2px,0) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(2px,0) rotate(1deg);
+            }
+        }
+
+        .controls {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn {
+            flex: 1;
+            border: none;
+            border-radius: 14px;
+            padding: 13px 10px;
+            font-family: 'Inter';
+            font-weight: 700;
+            font-size: 13.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: transform .12s ease, filter .12s ease;
+        }
+
+            .btn:active {
+                transform: scale(0.96);
+            }
+
+            .btn svg {
+                width: 16px;
+                height: 16px;
+            }
+
+        .btn-ghost {
+            background: var(--panel);
+            color: var(--ink);
+            border: 1px solid var(--panel-line);
+        }
+
+            .btn-ghost:hover {
+                filter: brightness(1.15);
+            }
+
+        .btn-primary {
+            background: linear-gradient(160deg,#3ee07a,#189a4d);
+            color: #04220f;
+            box-shadow: 0 4px 0 #0d6b32, 0 10px 22px rgba(34,197,94,0.35);
+        }
+
+            .btn-primary:active {
+                box-shadow: 0 1px 0 #0d6b32;
+            }
+
+        .hint {
+            margin-top: 12px;
+            font-size: 12.5px;
+            color: var(--ink-dim);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* --- Win modal --- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4,6,16,0.72);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+            .overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .modal {
+            width: min(360px, 86vw);
+            background: linear-gradient(160deg, #171d3a, #10142a);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 30px 26px 26px;
+            text-align: center;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02);
+            transform: scale(0.85) translateY(10px);
+            transition: transform .32s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-badge {
+            width: 74px;
+            height: 74px;
+            margin: 0 auto 14px;
+            border-radius: 20px;
+            background: linear-gradient(160deg,#ffd76a,#f5a623);
+            box-shadow: 0 6px 0 #b9761a, 0 14px 30px rgba(245,166,35,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pop-in .5s cubic-bezier(.34,1.56,.64,1);
+        }
+
+            .modal-badge svg {
+                width: 38px;
+                height: 38px;
+            }
+
+        @keyframes pop-in {
+            0% {
+                transform: scale(0) rotate(-25deg);
+            }
+
+            60% {
+                transform: scale(1.15) rotate(6deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .modal h2 {
+            font-family: 'Baloo 2';
+            font-size: 26px;
+            margin: 0 0 6px;
+        }
+
+        .modal p {
+            color: var(--ink-dim);
+            font-size: 14px;
+            margin: 0 0 22px;
+        }
+
+        .modal-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+            .modal-stats .stat-card {
+                background: rgba(255,255,255,0.04);
+            }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        canvas#confetti {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        footer {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #4d5580;
+            text-align: center;
+        }
+
+        @media (max-width:380px) {
+            h1 {
+                font-size: 19px;
+            }
+
+            .stat-value {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrap">
+        <header>
+            <div class="brand">
+                <div class="brand-badge">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M3 12H19M19 12L12 5M19 12L12 19" stroke="#04220f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </div>
+                <h1>Arrow Escape</h1>
+            </div>
+            <button class="mute-btn" id="muteBtn" title="Toggle sound"></button>
+        </header>
+
+        <div class="stat-row">
+            <div class="stat-card">
+                <span class="stat-label">Level</span>
+                <span class="stat-value" id="levelVal">1</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Arrows left</span>
+                <span class="stat-value arrows" id="arrowsVal">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Moves</span>
+                <span class="stat-value" id="movesVal">0</span>
+            </div>
+        </div>
+
+        <div class="board-shell">
+            <div id="board"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-ghost" id="restartBtn">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 4v6h6M20 20v-6h-6M4.5 15a8 8 0 0014.9 3M19.5 9A8 8 0 004.6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                Restart
+            </button>
+            <button class="btn btn-ghost" id="shuffleBtn">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h3.5c1.2 0 2 .5 2.7 1.5L15 17c.7 1 1.5 1.5 2.7 1.5H21M4 17h3.5c1.2 0 2-.5 2.7-1.5L15 7c.7-1 1.5-1.5 2.7-1.5H21M18 4l3 2.5L18 9M18 15l3 2.5L18 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                New puzzle
+            </button>
+        </div>
+
+        <p class="hint">Tap an arrow to slide it. It escapes only if the path in its direction is completely clear.</p>
+
+        <footer>Arrow Escape — clear the board, one slide at a time.</footer>
+    </div>
+
+    <div class="overlay" id="winOverlay">
+        <div class="modal">
+            <div class="modal-badge">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l2.6 6.2 6.7.6-5.1 4.4 1.6 6.5L12 16.7 6.2 19.7l1.6-6.5L2.7 8.8l6.7-.6L12 2z" fill="#7a3d00" /></svg>
+            </div>
+            <h2>Board cleared!</h2>
+            <p id="winSub">Every arrow made it out.</p>
+            <div class="modal-stats">
+                <div class="stat-card">
+                    <span class="stat-label">Level</span>
+                    <span class="stat-value" id="winLevel">1</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Moves</span>
+                    <span class="stat-value" id="winMoves">0</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="replayBtn">Replay</button>
+                <button class="btn btn-primary" id="nextBtn">Next level →</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+(function(){
+  "use strict";
+
+  /* ---------------- Audio (tiny synth, no assets) ---------------- */
+  let audioCtx = null, muted = false;
+  function ac(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return audioCtx; }
+  function tone(freq, dur, type, gainAmt, delay){
+    if(muted) return;
+    const c = ac(); if(!c) return;
+    delay = delay||0;
+    const t0 = c.currentTime + delay;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type||'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(gainAmt||0.15, t0+0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0); osc.stop(t0+dur+0.02);
+  }
+  function sfxPop(){ tone(520,0.12,'triangle',0.14); tone(760,0.10,'sine',0.08,0.03); }
+  function sfxBlock(){ tone(140,0.14,'sawtooth',0.09); }
+  function sfxWin(){
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,0.5,'triangle',0.13,i*0.11));
+  }
+  document.getElementById('muteBtn').addEventListener('click', function(){
+    muted = !muted;
+    renderMuteIcon();
+  });
+  function renderMuteIcon(){
+    const btn = document.getElementById('muteBtn');
+    btn.innerHTML = muted
+      ? '<svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  }
+  renderMuteIcon();
+
+  /* ---------------- Palette ---------------- */
+  const PALETTE = [
+    '#ff8a3d', // orange
+    '#2dd4bf', // teal
+    '#3b82f6', // blue
+    '#8b5cf6', // violet
+    '#ec4899', // magenta
+    '#f43f5e', // crimson
+    '#f5c542', // gold
+  ];
+  function hexToRgb(h){ h=h.replace('#',''); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
+  function rgbToHex(r,g,b){ return '#'+[r,g,b].map(x=>Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0')).join(''); }
+  function shade(hex, amt){ const [r,g,b]=hexToRgb(hex); return rgbToHex(r+amt,g+amt,b+amt); }
+  function lighten(hex, amt){ return shade(hex, amt); }
+  function darken(hex, amt){ return shade(hex, -amt); }
+
+  /* ---------------- Game state ---------------- */
+  let level = 1;
+  let moves = 0;
+  let gridSize = 6;
+  let cellPx = 0;
+  let arrows = [];   // {id, orientation, r, c, len, dir, color, special}
+  let occ = [];       // occ[r][c] = arrow id or null
+  let uidCounter = 0;
+
+  const boardEl = document.getElementById('board');
+  const levelValEl = document.getElementById('levelVal');
+  const arrowsValEl = document.getElementById('arrowsVal');
+  const movesValEl = document.getElementById('movesVal');
+
+  function newOcc(size){
+    const g = [];
+    for(let r=0;r<size;r++){ g.push(new Array(size).fill(null)); }
+    return g;
+  }
+
+  function cellsOf(a){
+    const cells = [];
+    if(a.orientation==='h'){
+      for(let i=0;i<a.len;i++) cells.push([a.r, a.c+i]);
+    } else {
+      for(let i=0;i<a.len;i++) cells.push([a.r+i, a.c]);
+    }
+    return cells;
+  }
+
+  function frontCell(a){
+    const cells = cellsOf(a);
+    if(a.orientation==='h'){
+      return a.dir===1 ? cells[cells.length-1] : cells[0];
+    } else {
+      return a.dir===1 ? cells[cells.length-1] : cells[0];
+    }
+  }
+
+  // Returns true if arrow can slide completely off the board from current occ state
+  function canEscape(a, occGrid, size){
+    let [r,c] = frontCell(a);
+    const dr = a.orientation==='v' ? a.dir : 0;
+    const dc = a.orientation==='h' ? a.dir : 0;
+    while(true){
+      r += dr; c += dc;
+      if(r<0||r>=size||c<0||c>=size) return true;
+      const occId = occGrid[r][c];
+      if(occId !== null && occId !== a.id) return false;
+      // else empty or somehow own cell (shouldn't happen) -> keep going
+    }
+  }
+
+  function placeOnOcc(a, occGrid){
+    cellsOf(a).forEach(([r,c])=>{ occGrid[r][c] = a.id; });
+  }
+  function removeFromOcc(a, occGrid){
+    cellsOf(a).forEach(([r,c])=>{ occGrid[r][c] = null; });
+  }
+
+  function isSolvable(arrowList, size){
+    const g = newOcc(size);
+    const remaining = arrowList.map(a=>({...a}));
+    remaining.forEach(a=>placeOnOcc(a,g));
+    let changed = true;
+    while(changed){
+      changed = false;
+      for(let i=remaining.length-1;i>=0;i--){
+        const a = remaining[i];
+        if(canEscape(a,g,size)){
+          removeFromOcc(a,g);
+          remaining.splice(i,1);
+          changed = true;
+        }
+      }
+    }
+    return remaining.length === 0;
+  }
+
+  function randInt(n){ return Math.floor(Math.random()*n); }
+  function pick(arr){ return arr[randInt(arr.length)]; }
+
+  function tryBuildLevel(size, count){
+    const g = newOcc(size);
+    const list = [];
+    let uid = 0;
+    for(let i=0;i<count;i++){
+      let placed = false;
+      for(let t=0;t<50 && !placed;t++){
+        const orientation = Math.random()<0.5 ? 'h':'v';
+        const len = 1 + randInt(3); // 1..3
+        let r,c;
+        if(orientation==='h'){
+          if(size-len<0) continue;
+          r = randInt(size); c = randInt(size-len+1);
+        } else {
+          if(size-len<0) continue;
+          c = randInt(size); r = randInt(size-len+1);
+        }
+        const a = { id: uid, orientation, r, c, len, dir: Math.random()<0.5?1:-1, color: pick(PALETTE) };
+        let clash = false;
+        cellsOf(a).forEach(([rr,cc])=>{ if(g[rr][cc]!==null) clash = true; });
+        if(clash) continue;
+        placeOnOcc(a,g);
+        list.push(a);
+        uid++;
+        placed = true;
+      }
+    }
+    return list;
+  }
+
+  function generateLevel(lvl){
+    const size = Math.min(6 + Math.floor((lvl-1)/3), 8);
+    const targetCount = Math.min(5 + Math.floor(lvl*1.15), size*size - 6);
+    let best = null;
+    for(let attempt=0; attempt<160; attempt++){
+      const countTry = Math.max(3, targetCount - Math.floor(attempt/40));
+      const list = tryBuildLevel(size, countTry);
+      if(list.length>=3 && isSolvable(list,size)){
+        best = list;
+        break;
+      }
+    }
+    if(!best){
+      // fallback: minimal guaranteed-solvable puzzle
+      best = tryBuildLevel(size, 4);
+    }
+    // pick a special "escape" arrow for flair: the one with the largest length
+    best.sort((a,b)=>0);
+    if(best.length){
+      let specialIdx = 0;
+      best.forEach((a,i)=>{ if(a.len>best[specialIdx].len) specialIdx=i; });
+      best[specialIdx].special = true;
+    }
+    return { size, arrows: best };
+  }
+
+  /* ---------------- Rendering ---------------- */
+  function arrowPolygonPoints(a, cell){
+    const headLen = cell*0.62;
+    const hs = cell*0.19;
+    const headHalf = cell*0.40;
+    if(a.orientation==='h'){
+      const w = a.len*cell, cy = cell/2;
+      if(a.dir===1){
+        return [
+          [0,cy-hs],[w-headLen,cy-hs],[w-headLen,cy-headHalf],[w,cy],
+          [w-headLen,cy+headHalf],[w-headLen,cy+hs],[0,cy+hs]
+        ];
+      } else {
+        return [
+          [w,cy-hs],[headLen,cy-hs],[headLen,cy-headHalf],[0,cy],
+          [headLen,cy+headHalf],[headLen,cy+hs],[w,cy+hs]
+        ];
+      }
+    } else {
+      const h = a.len*cell, cx = cell/2;
+      if(a.dir===1){
+        return [
+          [cx-hs,0],[cx-hs,h-headLen],[cx-headHalf,h-headLen],[cx,h],
+          [cx+headHalf,h-headLen],[cx+hs,h-headLen],[cx+hs,0]
+        ];
+      } else {
+        return [
+          [cx-hs,h],[cx-hs,headLen],[cx-headHalf,headLen],[cx,0],
+          [cx+headHalf,headLen],[cx+hs,headLen],[cx+hs,h]
+        ];
+      }
+    }
+  }
+  function ptsToStr(pts){ return pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '); }
+
+  function buildArrowSVG(a, cell){
+    const w = a.orientation==='h' ? a.len*cell : cell;
+    const h = a.orientation==='h' ? cell : a.len*cell;
+    const pts = arrowPolygonPoints(a, cell);
+    const shadowPts = pts.map(p=>[p[0]+cell*0.09, p[1]+cell*0.13]);
+    const base = a.color;
+    const light = lighten(base, 55);
+    const dark = darken(base, 60);
+    const strokeDark = darken(base, 85);
+    const glow = a.special ? `<polygon points="${ptsToStr(pts)}" fill="none" stroke="${lighten(base,40)}" stroke-width="${cell*0.05}" opacity="0.55"/>` : '';
+    return `
+    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g${a.id}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="${light}"/>
+          <stop offset="0.55" stop-color="${base}"/>
+          <stop offset="1" stop-color="${dark}"/>
+        </linearGradient>
+      </defs>
+      <polygon points="${ptsToStr(shadowPts)}" fill="${strokeDark}" opacity="0.55"/>
+      <polygon class="core" points="${ptsToStr(pts)}" fill="url(#g${a.id})" stroke="${strokeDark}" stroke-width="${cell*0.045}" stroke-linejoin="round"/>
+      <polyline points="${ptsToStr(pts.slice(0, a.orientation==='h'? Math.ceil(pts.length/2)+1 : Math.ceil(pts.length/2)+1))}" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="${cell*0.035}" stroke-linecap="round" opacity="0.5"/>
+      ${glow}
+    </svg>`;
+  }
+
+  function layout(){
+    const boardRect = boardEl.getBoundingClientRect();
+    cellPx = boardRect.width / gridSize;
+    boardEl.style.setProperty('--gsize', gridSize);
+    arrows.forEach(a=>{
+      const el = document.getElementById('arrow-'+a.id);
+      if(!el) return;
+      el.style.left = (a.c*cellPx) + 'px';
+      el.style.top = (a.r*cellPx) + 'px';
+      el.style.width = (a.orientation==='h' ? a.len*cellPx : cellPx) + 'px';
+      el.style.height = (a.orientation==='h' ? cellPx : a.len*cellPx) + 'px';
+    });
+  }
+
+  function renderBoard(){
+    boardEl.innerHTML = '';
+    boardEl.style.setProperty('--gsize', gridSize);
+    const rect = boardEl.getBoundingClientRect();
+    cellPx = rect.width / gridSize;
+    arrows.forEach(a=>{
+      const div = document.createElement('div');
+      div.className = 'arrow' + (a.special ? ' special' : '');
+      div.id = 'arrow-'+a.id;
+      div.style.left = (a.c*cellPx) + 'px';
+      div.style.top = (a.r*cellPx) + 'px';
+      div.style.width = (a.orientation==='h' ? a.len*cellPx : cellPx) + 'px';
+      div.style.height = (a.orientation==='h' ? cellPx : a.len*cellPx) + 'px';
+      div.innerHTML = buildArrowSVG(a, cellPx);
+      div.addEventListener('click', ()=>handleArrowClick(a.id));
+      boardEl.appendChild(div);
+    });
+    updateStats();
+  }
+
+  function updateStats(){
+    levelValEl.textContent = level;
+    arrowsValEl.textContent = arrows.length;
+    movesValEl.textContent = moves;
+  }
+
+  /* ---------------- Interaction ---------------- */
+  function handleArrowClick(id){
+    const a = arrows.find(x=>x.id===id);
+    if(!a) return;
+    if(canEscape(a, occ, gridSize)){
+      moves++;
+      sfxPop();
+      const el = document.getElementById('arrow-'+id);
+      removeFromOcc(a, occ);
+      arrows = arrows.filter(x=>x.id!==id);
+      if(el){
+        const dr = a.orientation==='v' ? a.dir : 0;
+        const dc = a.orientation==='h' ? a.dir : 0;
+        const dist = cellPx * (gridSize+2);
+        el.classList.add('escaping');
+        el.style.transform = `translate(${dc*dist}px, ${dr*dist}px) rotate(${(dc||dr)>0?8:-8}deg)`;
+        setTimeout(()=>{ el.remove(); }, 400);
+      }
+      updateStats();
+      if(arrows.length===0){
+        setTimeout(triggerWin, 380);
+      }
+    } else {
+      sfxBlock();
+      const el = document.getElementById('arrow-'+id);
+      if(el){
+        el.classList.remove('blocked-shake');
+        void el.offsetWidth;
+        el.classList.add('blocked-shake');
+      }
+    }
+  }
+
+  /* ---------------- Level lifecycle ---------------- */
+  function startLevel(lvl, keepMoves){
+    level = lvl;
+    if(!keepMoves) moves = 0;
+    const gen = generateLevel(lvl);
+    gridSize = gen.size;
+    arrows = gen.arrows;
+    occ = newOcc(gridSize);
+    arrows.forEach(a=>placeOnOcc(a,occ));
+    renderBoard();
+  }
+
+  function restartCurrentLevel(){
+    // Regenerate a fresh solvable layout for the same level number (keeps difficulty, new arrangement)
+    moves = 0;
+    startLevel(level, true);
+  }
+
+  document.getElementById('restartBtn').addEventListener('click', restartCurrentLevel);
+  document.getElementById('shuffleBtn').addEventListener('click', restartCurrentLevel);
+  document.getElementById('replayBtn').addEventListener('click', ()=>{
+    closeWin();
+    restartCurrentLevel();
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    closeWin();
+    startLevel(level+1, false);
+  });
+
+  window.addEventListener('resize', layout);
+
+  /* ---------------- Win modal + confetti ---------------- */
+  const winOverlay = document.getElementById('winOverlay');
+  function triggerWin(){
+    sfxWin();
+    document.getElementById('winLevel').textContent = level;
+    document.getElementById('winMoves').textContent = moves;
+    winOverlay.classList.add('show');
+    burstConfetti();
+  }
+  function closeWin(){ winOverlay.classList.remove('show'); }
+
+  const confettiCanvas = document.getElementById('confetti');
+  const ctx = confettiCanvas.getContext('2d');
+  let confettiParticles = [];
+  let confettiRAF = null;
+  function resizeConfettiCanvas(){
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  resizeConfettiCanvas();
+  window.addEventListener('resize', resizeConfettiCanvas);
+
+  function burstConfetti(){
+    const colors = PALETTE;
+    const count = 140;
+    confettiParticles = [];
+    for(let i=0;i<count;i++){
+      confettiParticles.push({
+        x: confettiCanvas.width/2 + (Math.random()-0.5)*160,
+        y: confettiCanvas.height*0.35 + (Math.random()-0.5)*60,
+        vx: (Math.random()-0.5)*11,
+        vy: -Math.random()*11 - 4,
+        size: 5 + Math.random()*6,
+        color: colors[randInt(colors.length)],
+        rot: Math.random()*Math.PI*2,
+        vrot: (Math.random()-0.5)*0.3,
+        shape: Math.random()<0.5 ? 'rect':'circle',
+        life: 0,
+        maxLife: 130 + randInt(60)
+      });
+    }
+    if(confettiRAF) cancelAnimationFrame(confettiRAF);
+    animateConfetti();
+  }
+  function animateConfetti(){
+    ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+    let alive = false;
+    confettiParticles.forEach(p=>{
+      if(p.life>p.maxLife) return;
+      alive = true;
+      p.vy += 0.16;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vrot;
+      p.life++;
+      const fade = 1 - Math.max(0,(p.life - p.maxLife*0.7)/(p.maxLife*0.3));
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = Math.max(0,Math.min(1,fade));
+      ctx.fillStyle = p.color;
+      if(p.shape==='rect'){
+        ctx.fillRect(-p.size/2,-p.size/3,p.size, p.size*0.62);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0,0,p.size/2,0,Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+    if(alive){
+      confettiRAF = requestAnimationFrame(animateConfetti);
+    } else {
+      ctx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+    }
+  }
+
+  /* ---------------- Boot ---------------- */
+  startLevel(1, false);
+  window.addEventListener('load', layout);
+})();
+    </script>
+</body>
+</html>
